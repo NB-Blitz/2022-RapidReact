@@ -14,6 +14,8 @@ public class Robot extends TimedRobot {
 	CANSparkMax frontLeft = new CANSparkMax(1, MotorType.kBrushless);
 	CANSparkMax frontRight = new CANSparkMax(3, MotorType.kBrushless);
 
+	Launcher ballLauncher = new Launcher();
+
 	@Override
 	public void robotInit() {
 
@@ -50,5 +52,7 @@ public class Robot extends TimedRobot {
 		backRight.set(xInput + yInput + zInput);
 		frontLeft.set(xInput + yInput - zInput);
 		frontRight.set(-xInput + yInput - zInput);
+
+		ballLauncher.rev(0.8);
 	}
 }
