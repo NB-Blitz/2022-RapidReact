@@ -8,13 +8,15 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 public class Robot extends TimedRobot {
 
+	private final double DEADBAND = 0.2;
+
 	XboxController driveController = new XboxController(0);
 	CANSparkMax backLeft = new CANSparkMax(2, MotorType.kBrushless);
 	CANSparkMax backRight = new CANSparkMax(4, MotorType.kBrushless);
 	CANSparkMax frontLeft = new CANSparkMax(1, MotorType.kBrushless);
 	CANSparkMax frontRight = new CANSparkMax(3, MotorType.kBrushless);
 
-	Launcher ballLauncher = new Launcher();
+	//Launcher ballLauncher = new Launcher();
 
 	@Override
 	public void robotInit() {
@@ -44,15 +46,25 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
-		double xInput = driveController.getRawAxis(0);
-		double yInput = driveController.getRawAxis(1);
-		double zInput = driveController.getRawAxis(2);
+		double xInput = driveController.getLeftX();
+		double yInput = -driveController.getLeftY();
+		double zInput = -driveController.getRightX();
 
-		backLeft.set(-xInput + yInput + zInput);
+		if (Math.abs(xInput) < DEADBAND) {
+			xInput = 0;
+		}
+		if (Math.abs(yInput) < DEADBAND) {
+			yInput = 0;
+		}
+		if (Math.abs(zInput) < DEADBAND) {
+			zInput = 0;
+		}
+
+		backLeft.set(-(-xInput + yInput - zInput));
 		backRight.set(xInput + yInput + zInput);
-		frontLeft.set(xInput + yInput - zInput);
-		frontRight.set(-xInput + yInput - zInput);
+		frontLeft.set(-(xInput + yInput - zInput));
+		frontRight.set(-xInput + yInput + zInput);
 
-		ballLauncher.rev(0.8);
+		//ballLauncher.rev(0.8);
 	}
 }
