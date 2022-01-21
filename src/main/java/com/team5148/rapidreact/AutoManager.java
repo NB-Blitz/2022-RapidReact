@@ -29,11 +29,12 @@ public class AutoManager {
     ShuffleboardTab autoTab = Shuffleboard.getTab("Autonomous");
     NetworkTableEntry stateEntry = autoTab.add("Auto State", 0).getEntry();
     NetworkTableEntry timeentry = autoTab.add("Time Entry", 0).getEntry();
+    NetworkTableEntry rotateEntry = autoTab.add("Rotation", 0).getEntry();
     NetworkTableEntry xBallEntry = NetworkTableInstance.getDefault().getTable("Autonomous").getEntry("X Ball Value");
     NetworkTableEntry yBallEntry = NetworkTableInstance.getDefault().getTable("Autonomous").getEntry("Y Ball Value");
     // State
     int autoState = 1;
-    int autoPosition = 10;
+    int autoPosition = 2;
 
     public void reset() {
         timer.reset();
@@ -60,7 +61,8 @@ public class AutoManager {
 
     public void calculatePosition2() {
         double time = timer.get();
-        double rotation = navx.getFusedHeading();
+        double rotation = navx.getAngle();
+        rotateEntry.setDouble(rotation);
 
         if (autoState == 1) {
             leftSpeed = -.5;
@@ -70,6 +72,8 @@ public class AutoManager {
                 nextState();
         } else if (autoState == 2) {
             // TODO: Launch Ball
+            leftSpeed = 0;
+            rightSpeed = 0;
 
             if (time > 1)
                 nextState();
@@ -77,8 +81,40 @@ public class AutoManager {
             leftSpeed = .5;
             rightSpeed = -.5;
 
-            if (rotation > 135)
+            if (rotation > 165)
                 nextState();
+        } else if (autoState == 4)  {
+            trackBall();
+
+            leftSpeed += 0.6;
+            rightSpeed += 0.6;
+
+            if (time > 3)
+                nextState();
+        } else if (autoState == 5) {
+            leftSpeed = -.5;
+            rightSpeed = .5;
+
+            if (rotation < 10)
+                nextState();
+        } else if (autoState == 6)  {
+            trackGoal();
+
+            leftSpeed += 0.4;
+            rightSpeed += 0.4;
+
+            if (time > 5)
+                nextState();
+        } else if (autoState == 2) {
+            // TODO: Launch Ball
+            leftSpeed = 0;
+            rightSpeed = 0;
+
+            if (time > 1)
+                nextState();
+        } else {
+            leftSpeed = 0;
+            rightSpeed = 0;
         }
     }
 
@@ -117,10 +153,12 @@ public class AutoManager {
         double newX = ((2*x)/SCREEN_WIDTH)-1;
         double newY = ((2*y)/SCREEN_HEIGHT)-1;
 
+        leftSpeed = newX * 0.4;
+        rightSpeed = -newX * 0.4;
+    }
 
-
-        leftSpeed = newX * 0.6;
-        rightSpeed = -newX * 0.6;
+    public void trackGoal() {
+        trackBall(); // TODO: Track Goal
     }
 
 }
