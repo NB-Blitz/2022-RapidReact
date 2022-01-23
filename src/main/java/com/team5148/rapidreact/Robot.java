@@ -1,18 +1,14 @@
 package com.team5148.rapidreact;
 
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.I2C.Port;
 
-import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 public class Robot extends TimedRobot {
 
 	private final double DEADBAND = 0.2;
-	private final double LAUNCHER_SPEED = 0.5;
 
 	// Controllers
 	XboxController driveController = new XboxController(0);
@@ -29,8 +25,8 @@ public class Robot extends TimedRobot {
 
 	// Subsystems
 	AutoManager autoManager = new AutoManager();
-	//BallLauncher ballLauncher = new BallLauncher();
-	//BallStorage ballStorage = new BallStorage();
+	BallLauncher ballLauncher = new BallLauncher();
+	BallStorage ballStorage = new BallStorage();
 
 	@Override
 	public void robotInit() {
@@ -51,11 +47,33 @@ public class Robot extends TimedRobot {
 
 		double leftSpeed = autoManager.leftSpeed;
 		double rightSpeed = autoManager.rightSpeed;
+		boolean isIntaking = autoManager.isIntaking;
+		boolean isStoraging = autoManager.isStoraging;
+		boolean isLaunching = autoManager.isLaunching;
 
-		frontLeft.set(-leftSpeed);
-		backLeft.set(-leftSpeed);
-		frontRight.set(rightSpeed);
-		backRight.set(rightSpeed);
+		if ( isIntaking ) {
+			ballStorage.runIntake();
+		}
+		else{
+			ballStorage.stopIntake();
+		}
+		if ( isStoraging) {
+			ballStorage.runStorage();
+		}
+		else {
+			ballStorage.stopStorage();
+		}
+		if(isLaunching) {
+			ballLauncher.runLauncher();
+		}
+		else{
+			ballLauncher.stopLauncher();
+		}
+
+		frontLeft.set(rightSpeed);
+		backLeft.set(rightSpeed);
+		frontRight.set(-leftSpeed);
+		backRight.set(-leftSpeed);
 	}
 
 	/*
@@ -68,6 +86,9 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
+		double launcherInput = driveController.getRightTriggerAxis();
+		double intakeInput = driveController.getLeftTriggerAxis();
+		boolean storageInput = driveController.getXButton();
 		double xInput = driveController.getLeftX();
 		double yInput = -driveController.getLeftY();
 		double zInput = -driveController.getRightX();
@@ -87,6 +108,11 @@ public class Robot extends TimedRobot {
 		frontLeft.set(-(xInput + yInput - zInput));
 		frontRight.set(-xInput + yInput + zInput);
 
-		//ballLauncher.rev(0.8);
+		ballLauncher.runLauncher(launcherInput);
+		ballStorage.runIntake(intakeInput);
+		if (storageInput)
+			ballStorage.runStorage();
+		else
+			ballStorage.stopStorage();
 	}
 }

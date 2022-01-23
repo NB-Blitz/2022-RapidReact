@@ -20,6 +20,9 @@ public class AutoManager {
     // Output Data
     public double leftSpeed = 0;
     public double rightSpeed = 0;
+    public boolean isIntaking = false;
+    public boolean isStoraging = false;
+    public boolean isLaunching = false;
 
     // Sensors
     Timer timer = new Timer();
@@ -27,11 +30,15 @@ public class AutoManager {
 
     // Network Tables
     ShuffleboardTab autoTab = Shuffleboard.getTab("Autonomous");
-    NetworkTableEntry stateEntry = autoTab.add("Auto State", 0).getEntry();
-    NetworkTableEntry timeentry = autoTab.add("Time Entry", 0).getEntry();
-    NetworkTableEntry rotateEntry = autoTab.add("Rotation", 0).getEntry();
-    NetworkTableEntry xBallEntry = NetworkTableInstance.getDefault().getTable("Autonomous").getEntry("X Ball Value");
-    NetworkTableEntry yBallEntry = NetworkTableInstance.getDefault().getTable("Autonomous").getEntry("Y Ball Value");
+    NetworkTableEntry stateEntry = autoTab.add("Autonomous State", 0).getEntry();
+    NetworkTableEntry timeentry = autoTab.add("Autonomous Timer", 0).getEntry();
+    NetworkTableEntry rotateEntry = autoTab.add("Gyro Angle", 0).getEntry();
+
+    NetworkTable ballTable = NetworkTableInstance.getDefault().getTable("Ball Auto");
+    NetworkTableEntry ballXEntry = ballTable.getEntry("X Value");
+    NetworkTableEntry ballYEntry = ballTable.getEntry("Y Value");
+    NetworkTableEntry ballAreaEntry = ballTable.getEntry("Area");
+
     // State
     int autoState = 1;
     int autoPosition = 2;
@@ -41,6 +48,12 @@ public class AutoManager {
         timer.start();
         navx.reset();
         autoState = 1;
+        leftSpeed = 0;
+        rightSpeed = 0;
+        isIntaking = false;
+        isStoraging = false;
+        isLaunching = false;
+        
     }
 
     public void calculate() {
@@ -48,14 +61,19 @@ public class AutoManager {
             calculatePosition2();
         if (autoPosition == 3)
             calculatePosition3();
-        if(autoPosition == 10) {
+        if(autoPosition == 10)
             trackBall();
-        }
     }
 
     public void nextState() {
         timer.reset();
         autoState++;
+        leftSpeed = 0;
+        rightSpeed = 0;
+        isIntaking = false;
+        isStoraging = false;
+        isLaunching = false;
+
         stateEntry.setNumber(autoState);
     }
 
@@ -64,53 +82,52 @@ public class AutoManager {
         double rotation = navx.getAngle();
         rotateEntry.setDouble(rotation);
 
-        if (autoState == 1) {
-            leftSpeed = -.5;
-            rightSpeed = -.5;
+        if (autoState == 1) { // Backwards
+            leftSpeed = -.2;
+            rightSpeed = -.2;
 
-            if (time > 1)
+            if (time > 2)
                 nextState();
-        } else if (autoState == 2) {
-            // TODO: Launch Ball
-            leftSpeed = 0;
-            rightSpeed = 0;
+        } else if (autoState == 2) { // Launch
+            isLaunching = true;
+            isStoraging = true;
 
-            if (time > 1)
+            if (time > 2)
                 nextState();
-        } else if (autoState == 3) {
-            leftSpeed = .5;
-            rightSpeed = -.5;
+        } else if (autoState == 3) { // Turn
+            leftSpeed = .2;
+            rightSpeed = -.2;
 
-            if (rotation > 165)
+            if (rotation > 180)
                 nextState();
-        } else if (autoState == 4)  {
+        } else if (autoState == 4)  { // Ball
             trackBall();
 
-            leftSpeed += 0.6;
-            rightSpeed += 0.6;
+            leftSpeed += 0.2;
+            rightSpeed += 0.2;
+            isIntaking = true;
 
-            if (time > 3)
+            if (time > 4)
                 nextState();
-        } else if (autoState == 5) {
-            leftSpeed = -.5;
-            rightSpeed = .5;
+        } else if (autoState == 5) { // Turn
+            leftSpeed = -.2;
+            rightSpeed = .2;
 
             if (rotation < 10)
                 nextState();
-        } else if (autoState == 6)  {
+        } else if (autoState == 6)  { // Goal
             trackGoal();
 
-            leftSpeed += 0.4;
-            rightSpeed += 0.4;
+            leftSpeed += 0.2;
+            rightSpeed += 0.2;
 
-            if (time > 5)
+            if (time > 3)
                 nextState();
-        } else if (autoState == 2) {
-            // TODO: Launch Ball
-            leftSpeed = 0;
-            rightSpeed = 0;
+        } else if (autoState == 2) { // Launch
+            isLaunching = true;
+            isStoraging = false;
 
-            if (time > 1)
+            if (time > 2)
                 nextState();
         } else {
             leftSpeed = 0;
@@ -148,8 +165,8 @@ public class AutoManager {
     }
 
     public void trackBall() {
-        double x = xBallEntry.getDouble(SCREEN_WIDTH / 2);
-        double y = yBallEntry.getDouble(SCREEN_HEIGHT / 2);
+        double x = ballXEntry.getDouble(SCREEN_WIDTH / 2);
+        double y = ballYEntry.getDouble(SCREEN_HEIGHT / 2);
         double newX = ((2*x)/SCREEN_WIDTH)-1;
         double newY = ((2*y)/SCREEN_HEIGHT)-1;
 
