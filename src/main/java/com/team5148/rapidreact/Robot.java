@@ -20,9 +20,6 @@ public class Robot extends TimedRobot {
 	CANSparkMax frontLeft = new CANSparkMax(1, MotorType.kBrushless);
 	CANSparkMax frontRight = new CANSparkMax(3, MotorType.kBrushless);
 
-	// Sensors
-	
-
 	// Subsystems
 	AutoManager autoManager = new AutoManager();
 	BallLauncher ballLauncher = new BallLauncher();
@@ -43,37 +40,24 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousPeriodic() {
-		autoManager.calculate();
+		autoManager.processAutonomous();
 
-		double leftSpeed = autoManager.leftSpeed;
-		double rightSpeed = autoManager.rightSpeed;
 		boolean isIntaking = autoManager.isIntaking;
 		boolean isStoraging = autoManager.isStoraging;
 		boolean isLaunching = autoManager.isLaunching;
 
-		if ( isIntaking ) {
-			ballStorage.runIntake();
-		}
-		else{
-			ballStorage.stopIntake();
-		}
-		if ( isStoraging) {
-			ballStorage.runStorage();
-		}
-		else {
-			ballStorage.stopStorage();
-		}
-		if(isLaunching) {
-			ballLauncher.runLauncher();
-		}
-		else{
-			ballLauncher.stopLauncher();
-		}
+		ballStorage.runIntake(isIntaking);
+		ballStorage.runStorage(isStoraging);
+		ballLauncher.runLauncher(isLaunching);
 
-		frontLeft.set(rightSpeed);
-		backLeft.set(rightSpeed);
-		frontRight.set(-leftSpeed);
-		backRight.set(-leftSpeed);
+		double xInput = autoManager.xInput;
+		double yInput = autoManager.yInput;
+		double zInput = autoManager.zInput;
+
+		backLeft.set(-(-xInput + yInput - zInput));
+		backRight.set(xInput + yInput + zInput);
+		frontLeft.set(-(xInput + yInput - zInput));
+		frontRight.set(-xInput + yInput + zInput);
 	}
 
 	/*
@@ -86,33 +70,40 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
+
+		// Inputs
 		double launcherInput = driveController.getRightTriggerAxis();
 		double intakeInput = driveController.getLeftTriggerAxis();
 		boolean storageInput = driveController.getXButton();
+		boolean trackGoalInput = driveController.getAButton();
+
 		double xInput = driveController.getLeftX();
 		double yInput = -driveController.getLeftY();
 		double zInput = -driveController.getRightX();
 
-		if (Math.abs(xInput) < DEADBAND) {
+		// Deadband
+		if (Math.abs(xInput) < DEADBAND)
 			xInput = 0;
-		}
-		if (Math.abs(yInput) < DEADBAND) {
+		if (Math.abs(yInput) < DEADBAND)
 			yInput = 0;
-		}
-		if (Math.abs(zInput) < DEADBAND) {
+		if (Math.abs(zInput) < DEADBAND)
 			zInput = 0;
+
+		// Track Goal
+		if (trackGoalInput) {
+			autoManager.trackGoal();
+			zInput = autoManager.zInput;
 		}
 
+		// Sub-Systems
+		ballLauncher.runLauncher(launcherInput);
+		ballStorage.runIntake(intakeInput);
+		ballStorage.runStorage(storageInput);
+
+		// Drivetrain
 		backLeft.set(-(-xInput + yInput - zInput));
 		backRight.set(xInput + yInput + zInput);
 		frontLeft.set(-(xInput + yInput - zInput));
-		frontRight.set(-xInput + yInput + zInput);
-
-		ballLauncher.runLauncher(launcherInput);
-		ballStorage.runIntake(intakeInput);
-		if (storageInput)
-			ballStorage.runStorage();
-		else
-			ballStorage.stopStorage();
+		frontRight.set(-xInput + yInput + zInput);		
 	}
 }

@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 public class BallLauncher {
+
     // Constants
     final double DEFAULT_TOP_SPEED = 0.7;
     final double DEFAULT_BOTTOM_SPEED = 0.7;
@@ -26,9 +27,9 @@ public class BallLauncher {
     RelativeEncoder topEncoder = topMotor.getEncoder();
     RelativeEncoder bottomEncoder = bottomMotor.getEncoder();
 
-    public void runLauncher() {
-        double topSpeed = topSpeedEntry.getDouble(DEFAULT_TOP_SPEED);
-        double bottomSpeed = bottomSpeedEntry.getDouble(DEFAULT_BOTTOM_SPEED);
+    public void runLauncher(boolean isRunning) {
+        double topSpeed = isRunning ? topSpeedEntry.getDouble(DEFAULT_TOP_SPEED) : 0;
+        double bottomSpeed = isRunning ? bottomSpeedEntry.getDouble(DEFAULT_BOTTOM_SPEED) : 0;
         runLauncher(topSpeed, bottomSpeed);
     }
 
@@ -42,9 +43,5 @@ public class BallLauncher {
 
         topMotor.set(-topSpeed);
         bottomMotor.set(bottomSpeed);
-    }
-
-    public void stopLauncher() {
-        runLauncher(0);
     }
 }

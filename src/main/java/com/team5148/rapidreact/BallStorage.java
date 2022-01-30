@@ -34,9 +34,8 @@ public class BallStorage {
     // Values
     boolean isStorageFull = false;
 
-    public void runStorage()
-    {
-        double storageSpeed = storageSpeedEntry.getDouble(DEFAULT_STORAGE_SPEED);
+    public void runStorage(boolean isRunning) {
+        double storageSpeed = isRunning ? storageSpeedEntry.getDouble(DEFAULT_STORAGE_SPEED) : 0;
         runStorage(storageSpeed);
     }
 
@@ -46,21 +45,13 @@ public class BallStorage {
         storageMotor3.set(-speed);
     }
 
-    public void stopStorage() {
-        runStorage(0);
-    }
-
-    public void runIntake()
+    public void runIntake(boolean isRunning)
     {
-        double intakeSpeed = intakeSpeedEntry.getDouble(DEFAULT_INTAKE_SPEED);
+        double intakeSpeed = isRunning ? intakeSpeedEntry.getDouble(DEFAULT_INTAKE_SPEED) : 0;
         runIntake(intakeSpeed);
     }
 
-    public void runIntake(double speed){
+    public void runIntake(double speed) {
         intakeMotor.set(speed);
-    }
-
-    public void stopIntake() {
-        runIntake(0);
     }
 }
