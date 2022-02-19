@@ -55,8 +55,8 @@ public class BallLauncher {
         topVelocityEntry.setDouble(topEncoder.getVelocity());
         bottomVelocityEntry.setDouble(bottomEncoder.getVelocity());
 
-        topMotor.set(-topSpeed);
-        bottomMotor.set(bottomSpeed);
+        topMotor.set(topSpeed);
+        bottomMotor.set(-bottomSpeed);
     }
     
     /**

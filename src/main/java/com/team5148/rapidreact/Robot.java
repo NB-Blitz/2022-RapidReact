@@ -179,14 +179,17 @@ public class Robot extends TimedRobot {
 		boolean storageInput = driveController.getBButton();
 		boolean feedInput = driveController.getXButton() || driveController.getYButton();
 
-		double leftInput = driveController.getLeftY();
-		double rightInput = driveController.getRightY();
+		double xInput = -driveController.getLeftX();
+		double yInput = -driveController.getLeftY();
+		double zInput = -driveController.getRightX();
 
 		// Deadband
-		if (Math.abs(leftInput) < DEADBAND)
-			leftInput = 0;
-		if (Math.abs(rightInput) < DEADBAND)
-			rightInput = 0;
+		if (Math.abs(xInput) < DEADBAND)
+			xInput = 0;
+		if (Math.abs(yInput) < DEADBAND)
+			yInput = 0;
+		if (Math.abs(zInput) < DEADBAND)
+			zInput = 0;
 		if (Math.abs(revAnalogInput) < DEADBAND)
 			revAnalogInput = 0;
 		
@@ -202,9 +205,9 @@ public class Robot extends TimedRobot {
 		ballStorage.runFeed(feedInput);
 
 		// Drivetrain
-		frontLeft.set(leftInput * DefaultSpeed.DRIVE);
-		backLeft.set(leftInput * DefaultSpeed.DRIVE);
-		frontRight.set(rightInput * DefaultSpeed.DRIVE);
-		backRight.set(rightInput * DefaultSpeed.DRIVE);
+		backLeft.set(-(-xInput + yInput - zInput));
+		backRight.set(xInput + yInput + zInput);
+		frontLeft.set(-(xInput + yInput - zInput));
+		frontRight.set(-xInput + yInput + zInput);
 	}
 }

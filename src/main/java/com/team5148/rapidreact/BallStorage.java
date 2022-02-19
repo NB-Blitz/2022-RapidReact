@@ -9,6 +9,7 @@ import com.team5148.rapidreact.config.MotorIDs;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
@@ -20,10 +21,10 @@ public class BallStorage {
     NetworkTableEntry feedSpeedEntry = storageTab.add("Feed Speed", DefaultSpeed.FEED).getEntry();
 
     // Motors
-    CANSparkMax feedMotor = new CANSparkMax(MotorIDs.FEED, MotorType.kBrushless);
-    CANSparkMax leftStorageMotor = new CANSparkMax(MotorIDs.LEFT_STORAGE, MotorType.kBrushless);
-    CANSparkMax rightStorageMotor = new CANSparkMax(MotorIDs.RIGHT_STORAGE, MotorType.kBrushless);
     CANSparkMax intakeMotor = new CANSparkMax(MotorIDs.INTAKE, MotorType.kBrushless);
+    TalonSRX feedMotor = new TalonSRX(MotorIDs.FEED);
+    TalonSRX leftStorageMotor = new TalonSRX(MotorIDs.LEFT_STORAGE);
+    TalonSRX rightStorageMotor = new TalonSRX(MotorIDs.RIGHT_STORAGE);
 
     // Line Breaks
     DigitalInput lineBreakBegin = new DigitalInput(0);
@@ -70,8 +71,8 @@ public class BallStorage {
      * @param speed - Speed to run storage motors at
      */
     public void runStorage(double speed){
-        leftStorageMotor.set(speed);
-        rightStorageMotor.set(-speed);
+        leftStorageMotor.set(ControlMode.PercentOutput, speed);
+        rightStorageMotor.set(ControlMode.PercentOutput, speed);
     }
 
     /**
@@ -88,7 +89,7 @@ public class BallStorage {
      * @param speed - Speed to run intake motors at
      */
     public void runIntake(double speed) {
-        intakeMotor.set(speed);
+        intakeMotor.set(-speed);
     }
 
     /**
@@ -105,6 +106,6 @@ public class BallStorage {
      * @param speed - Speed to run launcher feed motors at
      */
     public void runFeed(double speed) {
-        feedMotor.set(speed);
+        feedMotor.set(ControlMode.PercentOutput, -speed);
     }
 }
