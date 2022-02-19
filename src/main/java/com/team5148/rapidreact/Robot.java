@@ -2,23 +2,27 @@ package com.team5148.rapidreact;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.team5148.rapidreact.config.DefaultSpeed;
+import com.team5148.rapidreact.config.MotorIDs;
 
 public class Robot extends TimedRobot {
 
 	private final double DEADBAND = 0.2;
+	private final double RUMBLE = 0.2;
 
 	// Controllers
 	XboxController driveController = new XboxController(0);
 	XboxController manipController = new XboxController(1);
 
 	// Motos
-	CANSparkMax backLeft = new CANSparkMax(2, MotorType.kBrushless);
-	CANSparkMax backRight = new CANSparkMax(4, MotorType.kBrushless);
-	CANSparkMax frontLeft = new CANSparkMax(1, MotorType.kBrushless);
-	CANSparkMax frontRight = new CANSparkMax(3, MotorType.kBrushless);
+	CANSparkMax backLeft = new CANSparkMax(MotorIDs.BACK_LEFT, MotorType.kBrushless);
+	CANSparkMax backRight = new CANSparkMax(MotorIDs.BACK_RIGHT, MotorType.kBrushless);
+	CANSparkMax frontLeft = new CANSparkMax(MotorIDs.FRONT_LEFT, MotorType.kBrushless);
+	CANSparkMax frontRight = new CANSparkMax(MotorIDs.FRONT_RIGHT, MotorType.kBrushless);
 
 	// Subsystems
 	AutoManager autoManager = new AutoManager();
@@ -31,7 +35,13 @@ public class Robot extends TimedRobot {
 	}
 
 	/*
-	 * Autonomous
+                _                                              
+     /\        | |                                             
+    /  \  _   _| |_ ___  _ __   ___  _ __ ___   ___  _   _ ___ 
+   / /\ \| | | | __/ _ \| '_ \ / _ \| '_ ` _ \ / _ \| | | / __|
+  / ____ \ |_| | || (_) | | | | (_) | | | | | | (_) | |_| \__ \
+ /_/    \_\__,_|\__\___/|_| |_|\___/|_| |_| |_|\___/ \__,_|___/
+                                                                                                                    
 	 */
 	@Override
 	public void autonomousInit() {
@@ -61,7 +71,14 @@ public class Robot extends TimedRobot {
 	}
 
 	/*
-	 * Teleoperated
+  _______   _                                 _           _ 
+ |__   __| | |                               | |         | |
+    | | ___| | ___  ___  _ __   ___ _ __ __ _| |_ ___  __| |
+    | |/ _ \ |/ _ \/ _ \| '_ \ / _ \ '__/ _` | __/ _ \/ _` |
+    | |  __/ |  __/ (_) | |_) |  __/ | | (_| | ||  __/ (_| |
+    |_|\___|_|\___|\___/| .__/ \___|_|  \__,_|\__\___|\__,_|
+                        | |                                 
+                        |_|                                 
 	 */
 	@Override
 	public void teleopInit() {
@@ -72,14 +89,18 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 
 		// Inputs
-		double launcherInput = driveController.getRightTriggerAxis();
-		double intakeInput = driveController.getLeftTriggerAxis();
-		boolean storageInput = driveController.getXButton();
-		boolean trackGoalInput = driveController.getAButton();
+		double revAnalogInput = Math.max(manipController.getLeftTriggerAxis(), manipController.getRightTriggerAxis());
+		boolean revDigitalInput = manipController.getLeftBumper() || manipController.getRightBumper();
+		boolean shootInput = manipController.getAButton() || manipController.getBButton();
+		boolean trackBallInput = manipController.getXButton();
+		boolean trackGoalInput = manipController.getYButton();
+		double povInput = manipController.getPOV();
+		boolean forceIntakeInput = povInput == 0;
+		boolean forceOutakeInput = povInput == 180;
 
 		double xInput = driveController.getLeftX();
-		double yInput = -driveController.getLeftY();
-		double zInput = -driveController.getRightX();
+		double yInput = driveController.getLeftY();
+		double zInput = driveController.getRightX();
 
 		// Deadband
 		if (Math.abs(xInput) < DEADBAND)
@@ -89,21 +110,101 @@ public class Robot extends TimedRobot {
 		if (Math.abs(zInput) < DEADBAND)
 			zInput = 0;
 
-		// Track Goal
+		// Tracking
 		if (trackGoalInput) {
 			autoManager.trackGoal();
 			zInput = autoManager.zInput;
 		}
+		if (trackBallInput) {
+			autoManager.trackBall();
+			zInput = autoManager.zInput;
+		}
 
-		// Sub-Systems
-		ballLauncher.runLauncher(launcherInput);
-		ballStorage.runIntake(intakeInput);
-		ballStorage.runStorage(storageInput);
+		// Ball Launcher
+		if (revDigitalInput)
+			ballLauncher.runLauncher(true);
+		else
+			ballLauncher.runLauncher(revAnalogInput);
 
-		// Drivetrain
+		// Ball Storage
+		if (forceIntakeInput) {
+			manipController.setRumble(RumbleType.kRightRumble, RUMBLE);
+			ballStorage.runIntake(1);
+			ballStorage.runStorage(1);
+			ballStorage.runFeed(1);
+		}
+		else if (forceOutakeInput) {
+			manipController.setRumble(RumbleType.kLeftRumble, RUMBLE);
+			ballStorage.runIntake(-1);
+			ballStorage.runStorage(-1);
+			ballStorage.runFeed(-1);
+		}
+		else if (shootInput) {
+			ballStorage.runIntake(true);
+			ballStorage.runStorage(true);
+			ballStorage.runFeed(true);
+		}
+		else {
+			ballStorage.runAuto();
+		}
+
+		// Drive Train
 		backLeft.set(-(-xInput + yInput - zInput));
 		backRight.set(xInput + yInput + zInput);
 		frontLeft.set(-(xInput + yInput - zInput));
 		frontRight.set(-xInput + yInput + zInput);		
+	}
+
+	/*
+  _______        _   
+ |__   __|      | |  
+    | | ___  ___| |_ 
+    | |/ _ \/ __| __|
+    | |  __/\__ \ |_ 
+    |_|\___||___/\__|
+                     
+	*/
+	@Override
+	public void testInit() {
+
+	}
+
+	@Override
+	public void testPeriodic() {
+
+		// Inputs
+		double revAnalogInput = Math.max(driveController.getLeftTriggerAxis(), driveController.getRightTriggerAxis());
+		boolean revDigitalInput = driveController.getLeftBumper() || driveController.getRightBumper();
+		boolean intakeInput = driveController.getAButton();
+		boolean storageInput = driveController.getBButton();
+		boolean feedInput = driveController.getXButton() || driveController.getYButton();
+
+		double leftInput = driveController.getLeftY();
+		double rightInput = driveController.getRightY();
+
+		// Deadband
+		if (Math.abs(leftInput) < DEADBAND)
+			leftInput = 0;
+		if (Math.abs(rightInput) < DEADBAND)
+			rightInput = 0;
+		if (Math.abs(revAnalogInput) < DEADBAND)
+			revAnalogInput = 0;
+		
+		// Ball Launcher
+		if (revDigitalInput)
+			ballLauncher.runLauncher(true);
+		else
+			ballLauncher.runLauncher(revAnalogInput);
+
+		// Ball Storage
+		ballStorage.runStorage(storageInput);
+		ballStorage.runIntake(intakeInput);
+		ballStorage.runFeed(feedInput);
+
+		// Drivetrain
+		frontLeft.set(leftInput * DefaultSpeed.DRIVE);
+		backLeft.set(leftInput * DefaultSpeed.DRIVE);
+		frontRight.set(rightInput * DefaultSpeed.DRIVE);
+		backRight.set(rightInput * DefaultSpeed.DRIVE);
 	}
 }
