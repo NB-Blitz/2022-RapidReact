@@ -48,7 +48,7 @@ public class AutoManager {
     NetworkTableEntry goalAreaEntry = ballTable.getEntry("Area");
 
     // State
-    int autoState = 1;
+    int autoState = 5;
 
     public void reset() {
         timer.reset();
@@ -69,6 +69,8 @@ public class AutoManager {
         int autoPosition = posEntry.getNumber(10).intValue();
         if (autoPosition == 2)
             processPosition2();
+        if (autoPosition == 5)
+            processPosition5();
         if(autoPosition == 10)
             trackBall();
     }
@@ -85,6 +87,20 @@ public class AutoManager {
         isLaunching = false;
 
         stateEntry.setNumber(autoState);
+    }
+
+    private void processPosition5() {
+        double time = timer.get();
+
+        if (autoState == 1) {
+            yInput = 0.5;
+            if (time > 1)
+                nextState();
+        } else if (autoState == 2) {
+            isLaunching = true;
+            if (time > 1)
+                nextState();
+        }
     }
 
     private void processPosition2() {
@@ -138,6 +154,7 @@ public class AutoManager {
     }
 
     public void trackBall() {
+        /*
         double x = ballXEntry.getDouble(SCREEN_WIDTH / 2);
         double y = ballYEntry.getDouble(SCREEN_HEIGHT / 2);
         double newX = ((2*x)/SCREEN_WIDTH)-1;
@@ -146,6 +163,7 @@ public class AutoManager {
         xInput = 0;
         yInput = 0;
         zInput = newX * -BALL_ROTATE_SPEED;
+        */
     }
 
     public void trackGoal() {

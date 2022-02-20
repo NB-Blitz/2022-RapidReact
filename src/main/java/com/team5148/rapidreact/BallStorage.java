@@ -9,11 +9,11 @@ import com.team5148.rapidreact.config.MotorIDs;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 public class BallStorage {
+
     // Network
     ShuffleboardTab storageTab = Shuffleboard.getTab("Storage");
     NetworkTableEntry storageSpeedEntry = storageTab.add("Storage Speed", DefaultSpeed.STORAGE).getEntry();

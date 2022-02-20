@@ -88,19 +88,22 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 
-		// Inputs
+		// Manipulator Input
 		double revAnalogInput = Math.max(manipController.getLeftTriggerAxis(), manipController.getRightTriggerAxis());
 		boolean revDigitalInput = manipController.getLeftBumper() || manipController.getRightBumper();
-		boolean shootInput = manipController.getAButton() || manipController.getBButton();
-		boolean trackBallInput = manipController.getXButton();
-		boolean trackGoalInput = manipController.getYButton();
+		boolean shootInput = manipController.getYButton() || manipController.getBButton();
+		boolean intakeInput = manipController.getXButton() || manipController.getAButton();
 		double povInput = manipController.getPOV();
 		boolean forceIntakeInput = povInput == 0;
 		boolean forceOutakeInput = povInput == 180;
 
-		double xInput = driveController.getLeftX();
-		double yInput = driveController.getLeftY();
-		double zInput = driveController.getRightX();
+		// Driver Input
+		boolean slowInput = driveController.getLeftBumper() || driveController.getRightBumper();
+		boolean alignBallInput = driveController.getXButton() || driveController.getAButton();
+		boolean alignGoalInput = driveController.getYButton() || driveController.getBButton();
+		double xInput = -driveController.getLeftX();
+		double yInput = -driveController.getLeftY();
+		double zInput = -driveController.getRightX();
 
 		// Deadband
 		if (Math.abs(xInput) < DEADBAND)
@@ -109,15 +112,23 @@ public class Robot extends TimedRobot {
 			yInput = 0;
 		if (Math.abs(zInput) < DEADBAND)
 			zInput = 0;
+		if (Math.abs(revAnalogInput) < DEADBAND)
+			revAnalogInput = 0;
 
 		// Tracking
-		if (trackGoalInput) {
-			autoManager.trackGoal();
-			zInput = autoManager.zInput;
+		if (alignGoalInput) {
+			manipController.setRumble(RumbleType.kLeftRumble, RUMBLE);
+
+			// TODO: Test/Run Vision Code
+			//autoManager.trackGoal();
+			//zInput = autoManager.zInput;
 		}
-		if (trackBallInput) {
-			autoManager.trackBall();
-			zInput = autoManager.zInput;
+		if (alignBallInput) {
+			manipController.setRumble(RumbleType.kRightRumble, RUMBLE);
+
+			// TODO: Test/Run Vision Code
+			//autoManager.trackBall();
+			//zInput = autoManager.zInput;
 		}
 
 		// Ball Launcher
@@ -145,14 +156,16 @@ public class Robot extends TimedRobot {
 			ballStorage.runFeed(true);
 		}
 		else {
-			ballStorage.runAuto();
+			//ballStorage.runAuto();
+			ballStorage.runIntake(intakeInput);
 		}
 
 		// Drive Train
-		backLeft.set(-(-xInput + yInput - zInput));
-		backRight.set(xInput + yInput + zInput);
-		frontLeft.set(-(xInput + yInput - zInput));
-		frontRight.set(-xInput + yInput + zInput);		
+		double speed = slowInput ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;
+		backLeft.set(speed * (-(-xInput + yInput - zInput)));
+		backRight.set(speed * (xInput + yInput + zInput));
+		frontLeft.set(speed * (-(xInput + yInput - zInput)));
+		frontRight.set(speed * (-xInput + yInput + zInput));		
 	}
 
 	/*
@@ -179,17 +192,14 @@ public class Robot extends TimedRobot {
 		boolean storageInput = driveController.getBButton();
 		boolean feedInput = driveController.getXButton() || driveController.getYButton();
 
-		double xInput = -driveController.getLeftX();
-		double yInput = -driveController.getLeftY();
-		double zInput = -driveController.getRightX();
+		double leftInput = driveController.getLeftY();
+		double rightInput = -driveController.getRightY();
 
 		// Deadband
-		if (Math.abs(xInput) < DEADBAND)
-			xInput = 0;
-		if (Math.abs(yInput) < DEADBAND)
-			yInput = 0;
-		if (Math.abs(zInput) < DEADBAND)
-			zInput = 0;
+		if (Math.abs(leftInput) < DEADBAND)
+			leftInput = 0;
+		if (Math.abs(rightInput) < DEADBAND)
+			rightInput = 0;
 		if (Math.abs(revAnalogInput) < DEADBAND)
 			revAnalogInput = 0;
 		
@@ -205,9 +215,10 @@ public class Robot extends TimedRobot {
 		ballStorage.runFeed(feedInput);
 
 		// Drivetrain
-		backLeft.set(-(-xInput + yInput - zInput));
-		backRight.set(xInput + yInput + zInput);
-		frontLeft.set(-(xInput + yInput - zInput));
-		frontRight.set(-xInput + yInput + zInput);
+		frontLeft.set(leftInput);
+		backLeft.set(leftInput);
+		frontRight.set(rightInput);
+		backRight.set(rightInput);
+
 	}
 }
