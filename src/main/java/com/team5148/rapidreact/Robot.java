@@ -11,8 +11,9 @@ import com.team5148.rapidreact.config.MotorIDs;
 
 public class Robot extends TimedRobot {
 
-	private final double DEADBAND = 0.2;
+	private final double DEADBAND = 0.15;
 	private final double RUMBLE = 0.2;
+	private final double RAMP = 0.4;
 
 	// Controllers
 	XboxController driveController = new XboxController(0);
@@ -84,7 +85,10 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void teleopInit() {
-
+		backLeft.setOpenLoopRampRate(RAMP);
+		backRight.setOpenLoopRampRate(RAMP);
+		frontLeft.setOpenLoopRampRate(RAMP);
+		frontRight.setOpenLoopRampRate(RAMP);
 	}
 
 	@Override
