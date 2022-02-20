@@ -24,6 +24,7 @@ public class AutoManager {
     public double zInput = 0;
     public boolean isIntaking = false;
     public boolean isStoraging = false;
+    public boolean isFeeding = false;
     public boolean isLaunching = false;
 
     // Sensors
@@ -32,7 +33,7 @@ public class AutoManager {
 
     // Network Tables
     ShuffleboardTab autoTab = Shuffleboard.getTab("Autonomous");
-    NetworkTableEntry posEntry = autoTab.add("Position", 10).getEntry();
+    NetworkTableEntry posEntry = autoTab.add("Position", 5).getEntry();
     NetworkTableEntry stateEntry = autoTab.add("State", 0).getEntry();
     NetworkTableEntry timeentry = autoTab.add("Timer", 0).getEntry();
     NetworkTableEntry rotateEntry = autoTab.add("Gyro Angle", 0).getEntry();
@@ -48,7 +49,7 @@ public class AutoManager {
     NetworkTableEntry goalAreaEntry = ballTable.getEntry("Area");
 
     // State
-    int autoState = 5;
+    int autoState = 1;
 
     public void reset() {
         timer.reset();
@@ -61,6 +62,7 @@ public class AutoManager {
         zInput = 0;
         isIntaking = false;
         isStoraging = false;
+        isFeeding = false;
         isLaunching = false;
         
     }
@@ -84,6 +86,7 @@ public class AutoManager {
         zInput = 0;
         isIntaking = false;
         isStoraging = false;
+        isFeeding = false;
         isLaunching = false;
 
         stateEntry.setNumber(autoState);
@@ -93,11 +96,20 @@ public class AutoManager {
         double time = timer.get();
 
         if (autoState == 1) {
-            yInput = 0.5;
+            yInput = -0.5;
             if (time > 1)
                 nextState();
         } else if (autoState == 2) {
             isLaunching = true;
+            if (time > 1)
+                nextState();
+        } else if (autoState == 3) {
+            isFeeding = true;
+            isLaunching = true;
+            if (time > 1)
+                nextState();
+        } else if (autoState == 4) {
+            zInput = 0.5;
             if (time > 1)
                 nextState();
         }

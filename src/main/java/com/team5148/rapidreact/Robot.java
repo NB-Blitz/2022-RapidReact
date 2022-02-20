@@ -54,12 +54,14 @@ public class Robot extends TimedRobot {
 
 		boolean isIntaking = autoManager.isIntaking;
 		boolean isStoraging = autoManager.isStoraging;
+		boolean isFeeding = autoManager.isFeeding;
 		boolean isLaunching = autoManager.isLaunching;
 
 		ballStorage.runIntake(isIntaking);
 		ballStorage.runStorage(isStoraging);
+		ballStorage.runFeed(isFeeding);
 		ballLauncher.runLauncher(isLaunching);
-
+		
 		double xInput = autoManager.xInput;
 		double yInput = autoManager.yInput;
 		double zInput = autoManager.zInput;
@@ -101,7 +103,7 @@ public class Robot extends TimedRobot {
 		boolean slowInput = driveController.getLeftBumper() || driveController.getRightBumper();
 		boolean alignBallInput = driveController.getXButton() || driveController.getAButton();
 		boolean alignGoalInput = driveController.getYButton() || driveController.getBButton();
-		double xInput = -driveController.getLeftX();
+		double xInput = driveController.getLeftX();
 		double yInput = -driveController.getLeftY();
 		double zInput = -driveController.getRightX();
 
@@ -123,12 +125,16 @@ public class Robot extends TimedRobot {
 			//autoManager.trackGoal();
 			//zInput = autoManager.zInput;
 		}
-		if (alignBallInput) {
+		else if (alignBallInput) {
 			manipController.setRumble(RumbleType.kRightRumble, RUMBLE);
 
 			// TODO: Test/Run Vision Code
 			//autoManager.trackBall();
 			//zInput = autoManager.zInput;
+		}
+		else {
+			manipController.setRumble(RumbleType.kLeftRumble, 0);
+			manipController.setRumble(RumbleType.kRightRumble, 0);
 		}
 
 		// Ball Launcher
@@ -158,6 +164,8 @@ public class Robot extends TimedRobot {
 		else {
 			//ballStorage.runAuto();
 			ballStorage.runIntake(intakeInput);
+			ballStorage.runFeed(false);
+			ballStorage.runStorage(false);
 		}
 
 		// Drive Train
