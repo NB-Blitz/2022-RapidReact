@@ -13,13 +13,13 @@ public class Robot extends TimedRobot {
 
 	private final double DEADBAND = 0.15;
 	private final double RUMBLE = 0.2;
-	private final double RAMP = 0.4;
+	private final double RAMP = 0.3;
 
 	// Controllers
 	XboxController driveController = new XboxController(0);
 	XboxController manipController = new XboxController(1);
 
-	// Motos
+	// Motors
 	CANSparkMax backLeft = new CANSparkMax(MotorIDs.BACK_LEFT, MotorType.kBrushless);
 	CANSparkMax backRight = new CANSparkMax(MotorIDs.BACK_RIGHT, MotorType.kBrushless);
 	CANSparkMax frontLeft = new CANSparkMax(MotorIDs.FRONT_LEFT, MotorType.kBrushless);
@@ -33,6 +33,10 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotInit() {
 
+	}
+
+	@Override
+	public void robotPeriodic() {
 	}
 
 	/*
@@ -61,7 +65,7 @@ public class Robot extends TimedRobot {
 		ballStorage.runIntake(isIntaking);
 		ballStorage.runStorage(isStoraging);
 		ballStorage.runFeed(isFeeding);
-		ballLauncher.runLauncher(isLaunching);
+		ballLauncher.runVelocity(isLaunching);
 		
 		double xInput = autoManager.xInput;
 		double yInput = autoManager.yInput;
@@ -123,29 +127,25 @@ public class Robot extends TimedRobot {
 
 		// Tracking
 		if (alignGoalInput) {
-			manipController.setRumble(RumbleType.kLeftRumble, RUMBLE);
-
-			// TODO: Test/Run Vision Code
-			//autoManager.trackGoal();
-			//zInput = autoManager.zInput;
+			driveController.setRumble(RumbleType.kLeftRumble, RUMBLE);
+			autoManager.trackGoal();
+			zInput = autoManager.zInput;
 		}
 		else if (alignBallInput) {
-			manipController.setRumble(RumbleType.kRightRumble, RUMBLE);
-
-			// TODO: Test/Run Vision Code
+			driveController.setRumble(RumbleType.kRightRumble, RUMBLE);
 			//autoManager.trackBall();
 			//zInput = autoManager.zInput;
 		}
 		else {
-			manipController.setRumble(RumbleType.kLeftRumble, 0);
-			manipController.setRumble(RumbleType.kRightRumble, 0);
+			driveController.setRumble(RumbleType.kLeftRumble, 0);
+			driveController.setRumble(RumbleType.kRightRumble, 0);
 		}
 
 		// Ball Launcher
 		if (revDigitalInput)
-			ballLauncher.runLauncher(true);
+			ballLauncher.runVelocity(true);
 		else
-			ballLauncher.runLauncher(revAnalogInput);
+			ballLauncher.runPercentage(revAnalogInput);
 
 		// Ball Storage
 		if (forceIntakeInput) {
@@ -166,10 +166,10 @@ public class Robot extends TimedRobot {
 			ballStorage.runFeed(true);
 		}
 		else {
-			//ballStorage.runAuto();
-			ballStorage.runIntake(intakeInput);
-			ballStorage.runFeed(false);
-			ballStorage.runStorage(false);
+			ballStorage.runAutomatic();
+
+			manipController.setRumble(RumbleType.kLeftRumble, 0);
+			manipController.setRumble(RumbleType.kRightRumble, 0);
 		}
 
 		// Drive Train
@@ -217,9 +217,9 @@ public class Robot extends TimedRobot {
 		
 		// Ball Launcher
 		if (revDigitalInput)
-			ballLauncher.runLauncher(true);
+			ballLauncher.runPercentage(true);
 		else
-			ballLauncher.runLauncher(revAnalogInput);
+			ballLauncher.runPercentage(revAnalogInput);
 
 		// Ball Storage
 		ballStorage.runStorage(storageInput);

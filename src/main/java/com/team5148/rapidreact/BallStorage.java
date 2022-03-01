@@ -7,54 +7,35 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.team5148.rapidreact.config.DefaultSpeed;
 import com.team5148.rapidreact.config.MotorIDs;
 
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 public class BallStorage {
 
-    // Network
-    ShuffleboardTab storageTab = Shuffleboard.getTab("Storage");
-    NetworkTableEntry storageSpeedEntry = storageTab.add("Storage Speed", DefaultSpeed.STORAGE).getEntry();
-    NetworkTableEntry intakeSpeedEntry = storageTab.add("Intake Speed", DefaultSpeed.INTAKE).getEntry();
-    NetworkTableEntry feedSpeedEntry = storageTab.add("Feed Speed", DefaultSpeed.FEED).getEntry();
-
-    // Motors
-    CANSparkMax intakeMotor = new CANSparkMax(MotorIDs.INTAKE, MotorType.kBrushless);
-    TalonSRX feedMotor = new TalonSRX(MotorIDs.FEED);
-    TalonSRX leftStorageMotor = new TalonSRX(MotorIDs.LEFT_STORAGE);
-    TalonSRX rightStorageMotor = new TalonSRX(MotorIDs.RIGHT_STORAGE);
-
-    // Line Breaks
-    DigitalInput lineBreakBegin = new DigitalInput(0);
-    DigitalInput lineBreakEnd = new DigitalInput(1);
-
-    // Values
-    boolean isStorageFull = false;
-
-    /**
-     * Resets storage system
-     */
-    public void resetStorage() {
-        isStorageFull = false;
-    }
+    private CANSparkMax intakeMotor = new CANSparkMax(MotorIDs.INTAKE, MotorType.kBrushless);
+    private TalonSRX feedMotor = new TalonSRX(MotorIDs.FEED);
+    private TalonSRX leftStorageMotor = new TalonSRX(MotorIDs.LEFT_STORAGE);
+    private TalonSRX rightStorageMotor = new TalonSRX(MotorIDs.RIGHT_STORAGE);
+    
+    private DigitalInput lineBreakBegin = new DigitalInput(0);
+    private DigitalInput lineBreakEnd = new DigitalInput(1);
+    private NTManager nt = NTManager.getInstance();
 
     /**
      * Runs storage motors based on the line break sensors
      */
-    public void runAuto() {
-        boolean start = lineBreakBegin.get();
-        boolean end = lineBreakEnd.get();
+    public void runAutomatic() {
+        boolean start = !lineBreakBegin.get();
+        boolean end = !lineBreakEnd.get();
 
-        if (end && !start)
+        nt.lineBreak1.setBoolean(start);
+        nt.lineBreak2.setBoolean(end);
+        
+        if (end)
             runStorage(false);
         else
             runStorage(true);
         
-        if (end && start)
-            isStorageFull = true;
-        runIntake(!isStorageFull);
+        runIntake(!(end && start));
     }
 
     /**
@@ -62,7 +43,7 @@ public class BallStorage {
      * @param isRunning - Whether or not to run the storage
      */
     public void runStorage(boolean isRunning) {
-        double storageSpeed = isRunning ? storageSpeedEntry.getDouble(DefaultSpeed.STORAGE) : 0;
+        double storageSpeed = isRunning ? nt.storageSpeed.getDouble(DefaultSpeed.STORAGE) : 0;
         runStorage(storageSpeed);
     }
 
@@ -80,7 +61,7 @@ public class BallStorage {
      * @param isRunning - Whether or not to run the intake
      */
     public void runIntake(boolean isRunning) {
-        double intakeSpeed = isRunning ? intakeSpeedEntry.getDouble(DefaultSpeed.INTAKE) : 0;
+        double intakeSpeed = isRunning ? nt.intakeSpeed.getDouble(DefaultSpeed.INTAKE) : 0;
         runIntake(intakeSpeed);
     }
 
@@ -97,7 +78,7 @@ public class BallStorage {
      * @param isRunning - Whether or not to run the feed to the launcher
      */
     public void runFeed(boolean isRunning) {
-        double feedSpeed = isRunning ? feedSpeedEntry.getDouble(DefaultSpeed.FEED) : 0;
+        double feedSpeed = isRunning ? nt.feedSpeed.getDouble(DefaultSpeed.FEED) : 0;
         runFeed(feedSpeed);
     }
 

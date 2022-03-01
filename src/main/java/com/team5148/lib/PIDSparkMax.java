@@ -8,7 +8,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 
 public class PIDSparkMax {
     public String name;
@@ -18,7 +17,6 @@ public class PIDSparkMax {
     private CANSparkMax motor;
     private RelativeEncoder encoder;
     private SparkMaxPIDController pidController;
-    private double setVelocity = 0;
     
     private ShuffleboardTab shuffleboardTab;
     private NetworkTableEntry setVelocityEntry;
@@ -42,20 +40,35 @@ public class PIDSparkMax {
         shuffleboardTab = Shuffleboard.getTab(name);
         setVelocityEntry = shuffleboardTab.add("Set Velocity", 0).getEntry();
         velocityEntry = shuffleboardTab.add("Current Velocity", 0).getEntry();
-        pEntry = shuffleboardTab.add("Proportional", 0).getEntry();
-        iEntry = shuffleboardTab.add("Integral", 0).getEntry();
-        dEntry = shuffleboardTab.add("Derivative", 0).getEntry();
-        ffEntry = shuffleboardTab.add("Feed Forward", 0).getEntry();
-        minOutputEntry = shuffleboardTab.add("Min Output", 0).getEntry();
-        maxOutputEntry = shuffleboardTab.add("Max Output", 0).getEntry();
+        pEntry = shuffleboardTab.add("Proportional", pidConfig.p).getEntry();
+        iEntry = shuffleboardTab.add("Integral", pidConfig.p).getEntry();
+        dEntry = shuffleboardTab.add("Derivative", pidConfig.p).getEntry();
+        ffEntry = shuffleboardTab.add("Feed Forward", pidConfig.p).getEntry();
+        minOutputEntry = shuffleboardTab.add("Min Output", pidConfig.minOutput).getEntry();
+        maxOutputEntry = shuffleboardTab.add("Max Output", pidConfig.maxOutput).getEntry();
     }
 
+    /**
+     * Sets the PID configuration
+     * @param pidConfig - PID Configuration
+     */
     public void setConfig(PIDConfig pidConfig) {
         pidController.setP(pidConfig.p);
         pidController.setI(pidConfig.i);
         pidController.setD(pidConfig.d);
         pidController.setFF(pidConfig.ff);
         pidController.setOutputRange(pidConfig.minOutput, pidConfig.maxOutput);
+        this.pidConfig = pidConfig;
+    }
+
+    /**
+     * Sets the speed of the motor
+     * @param speed - Speed in Percent [-1 - 1]
+     */
+    public void setPercentage(double speed) {
+        setVelocityEntry.setDouble(0);
+        motor.set(speed);
+        update();
     }
 
     /**
@@ -63,8 +76,8 @@ public class PIDSparkMax {
      * @param velocity - Velocity in RPM
      */
     public void setVelocity(double velocity) {
-        pidController.setReference(velocity, CANSparkMax.ControlType.kVelocity);
-        this.setVelocity = velocity;
+        setVelocityEntry.setDouble(velocity);
+        update();
     }
 
     /**
@@ -76,34 +89,52 @@ public class PIDSparkMax {
     }
 
     /**
-     * Uploads all values from Shuffleboard. 
-     * Values are listed underneath the motor's name.
+     * Gets whether or not the motor is up to speed
+     * @param rpmRange - Range in RPM
+     * @return True if the motor is up to speed. False otherwise.
      */
-    public void putDashboard() {
-        setVelocityEntry.setDouble(setVelocity);
+    public boolean getRev(double rpmRange) {
+        return Math.abs(getVelocity() - setVelocityEntry.getDouble(0)) < rpmRange;
+    }
+
+    private void update() {
         velocityEntry.setDouble(getVelocity());
-        pEntry.setDouble(pidConfig.p);
-        iEntry.setDouble(pidConfig.i);
-        dEntry.setDouble(pidConfig.d);
-        ffEntry.setDouble(pidConfig.ff);
-        minOutputEntry.setDouble(pidConfig.minOutput);
-        maxOutputEntry.setDouble(pidConfig.maxOutput);
+        pidController.setReference(
+            setVelocityEntry.getDouble(0),
+            CANSparkMax.ControlType.kVelocity
+        );
+
+        // PID
+        double kP = pEntry.getDouble(pidConfig.p);
+        double kI = iEntry.getDouble(pidConfig.i);
+        double kD = dEntry.getDouble(pidConfig.d);
+        double kFF = ffEntry.getDouble(pidConfig.ff);
+        double minOutput = minOutputEntry.getDouble(pidConfig.minOutput);
+        double maxOutput = maxOutputEntry.getDouble(pidConfig.maxOutput);
+        
+        if (kP != pidConfig.p||
+            kI != pidConfig.i ||
+            kD != pidConfig.d ||
+            kFF != pidConfig.ff ||
+            minOutput != pidConfig.minOutput ||
+            maxOutput != pidConfig.maxOutput) {
+
+            pidConfig.p = kP;
+            pidConfig.i = kI;
+            pidConfig.d = kD;
+            pidConfig.ff = kFF;
+            pidConfig.minOutput = minOutput;
+            pidConfig.maxOutput = maxOutput;
+
+            setConfig(pidConfig);
+        }
     }
 
     /**
-     * Downloads all values from Shuffleboard. 
-     * Values are listed underneath the motor's name.
+     * Sets the motor to be reversed
+     * @param isInverted - Whether or not the motor is inverted
      */
-    public void getDashboard() {
-        double velocity = setVelocityEntry.getDouble(0);
-        double p = pEntry.getDouble(0);
-        double i = iEntry.getDouble(0);
-        double d = dEntry.getDouble(0);
-        double ff = ffEntry.getDouble(0);
-        double minOutput = minOutputEntry.getDouble(0);
-        double maxOutput = maxOutputEntry.getDouble(0);
-        
-        setConfig(new PIDConfig(p, i, d, ff, minOutput, maxOutput));
-        setVelocity(velocity);
+    public void setInverted(boolean isInverted) {
+        motor.setInverted(isInverted);
     }
 }
