@@ -1,9 +1,10 @@
-package com.team5148.rapidreact;
+package org.team5148.rapidreact.subsystem;
 
-import com.team5148.lib.PIDConfig;
-import com.team5148.lib.PIDSparkMax;
-import com.team5148.rapidreact.config.DefaultSpeed;
-import com.team5148.rapidreact.config.MotorIDs;
+import org.team5148.lib.PIDConfig;
+import org.team5148.lib.PIDSparkMax;
+import org.team5148.rapidreact.NTManager;
+import org.team5148.rapidreact.config.DefaultSpeed;
+import org.team5148.rapidreact.config.MotorIDs;
 
 public class BallLauncher {
     private static final double REV_RANGE = 100;
@@ -57,6 +58,15 @@ public class BallLauncher {
         double bottomSpeed = isRunning ? velocity - roll : 0;
 
         runVelocity(topSpeed, bottomSpeed);
+    }
+
+    /**
+     * Runs the launcher at a set velocity
+     * @param speed - Velocity to set to in RPM
+     */
+    public void runVelocity(double velocity){
+        double roll = nt.launcherRoll.getDouble(DefaultSpeed.ROLL);
+        runVelocity(velocity + roll, velocity - roll);
     }
     
     /**

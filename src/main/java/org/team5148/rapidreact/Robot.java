@@ -1,4 +1,4 @@
-package com.team5148.rapidreact;
+package org.team5148.rapidreact;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -6,8 +6,14 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.team5148.rapidreact.config.DefaultSpeed;
-import com.team5148.rapidreact.config.MotorIDs;
+
+import org.team5148.lib.Vector3;
+import org.team5148.rapidreact.autonomous.AutoInput;
+import org.team5148.rapidreact.autonomous.AutoManager;
+import org.team5148.rapidreact.config.DefaultSpeed;
+import org.team5148.rapidreact.config.MotorIDs;
+import org.team5148.rapidreact.subsystem.BallLauncher;
+import org.team5148.rapidreact.subsystem.BallStorage;
 
 public class Robot extends TimedRobot {
 
@@ -26,13 +32,19 @@ public class Robot extends TimedRobot {
 	CANSparkMax frontRight = new CANSparkMax(MotorIDs.FRONT_RIGHT, MotorType.kBrushless);
 
 	// Subsystems
-	AutoManager autoManager = new AutoManager();
+	AutoManager autoManager = new AutoManager(frontLeft, frontRight, backLeft, backRight);
 	BallLauncher ballLauncher = new BallLauncher();
 	BallStorage ballStorage = new BallStorage();
 
 	@Override
 	public void robotInit() {
+		frontLeft.setInverted(true);
+		backLeft.setInverted(true);
 
+		backLeft.setOpenLoopRampRate(RAMP);
+		backRight.setOpenLoopRampRate(RAMP);
+		frontLeft.setOpenLoopRampRate(RAMP);
+		frontRight.setOpenLoopRampRate(RAMP);
 	}
 
 	@Override
@@ -55,25 +67,28 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousPeriodic() {
-		autoManager.processAutonomous();
-
-		boolean isIntaking = autoManager.isIntaking;
-		boolean isStoraging = autoManager.isStoraging;
-		boolean isFeeding = autoManager.isFeeding;
-		boolean isLaunching = autoManager.isLaunching;
-
-		ballStorage.runIntake(isIntaking);
-		ballStorage.runStorage(isStoraging);
-		ballStorage.runFeed(isFeeding);
-		ballLauncher.runVelocity(isLaunching);
+		AutoInput input = autoManager.update();
 		
-		double xInput = autoManager.xInput;
-		double yInput = autoManager.yInput;
-		double zInput = autoManager.zInput;
+		// Ball Storage / Launcher
+		if (input.isShooting) {
+			ballLauncher.runVelocity(true);
 
-		backLeft.set(-(-xInput + yInput - zInput));
+			boolean isRev = ballLauncher.getRev();
+			ballStorage.runFeed(isRev);
+			ballStorage.runIntake(isRev);
+			ballStorage.runStorage(isRev);
+		} else {
+			ballStorage.runAutomatic();
+			ballLauncher.runVelocity(0);
+		}
+		
+		// Movement
+		double xInput = input.move.x;
+		double yInput = input.move.y;
+		double zInput = input.move.z;
+		backLeft.set(-xInput + yInput - zInput);
 		backRight.set(xInput + yInput + zInput);
-		frontLeft.set(-(xInput + yInput - zInput));
+		frontLeft.set(xInput + yInput - zInput);
 		frontRight.set(-xInput + yInput + zInput);
 	}
 
@@ -89,20 +104,18 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void teleopInit() {
-		backLeft.setOpenLoopRampRate(RAMP);
-		backRight.setOpenLoopRampRate(RAMP);
-		frontLeft.setOpenLoopRampRate(RAMP);
-		frontRight.setOpenLoopRampRate(RAMP);
+		
 	}
 
 	@Override
 	public void teleopPeriodic() {
+		autoManager.update();
 
 		// Manipulator Input
 		double revAnalogInput = Math.max(manipController.getLeftTriggerAxis(), manipController.getRightTriggerAxis());
 		boolean revDigitalInput = manipController.getLeftBumper() || manipController.getRightBumper();
-		boolean shootInput = manipController.getYButton() || manipController.getBButton();
-		boolean intakeInput = manipController.getXButton() || manipController.getAButton();
+		boolean shootInput = manipController.getAButton() || manipController.getBButton();
+		boolean stopAutoInput = manipController.getXButton() || manipController.getYButton();
 		double povInput = manipController.getPOV();
 		boolean forceIntakeInput = povInput == 0;
 		boolean forceOutakeInput = povInput == 180;
@@ -128,55 +141,65 @@ public class Robot extends TimedRobot {
 		// Tracking
 		if (alignGoalInput) {
 			driveController.setRumble(RumbleType.kLeftRumble, RUMBLE);
-			autoManager.trackGoal();
-			zInput = autoManager.zInput;
+			Vector3 input = autoManager.rotateToGoal();
+			zInput = input.z;
 		}
 		else if (alignBallInput) {
 			driveController.setRumble(RumbleType.kRightRumble, RUMBLE);
-			//autoManager.trackBall();
-			//zInput = autoManager.zInput;
+			Vector3 input = autoManager.rotateToBall();
+			zInput = input.z;
 		}
 		else {
 			driveController.setRumble(RumbleType.kLeftRumble, 0);
 			driveController.setRumble(RumbleType.kRightRumble, 0);
 		}
 
+		// Manip Rumble
+		if (forceIntakeInput || forceOutakeInput) {
+			manipController.setRumble(RumbleType.kLeftRumble, RUMBLE);
+			manipController.setRumble(RumbleType.kRightRumble, RUMBLE);
+		} else {
+			manipController.setRumble(RumbleType.kLeftRumble, 0);
+			manipController.setRumble(RumbleType.kRightRumble, 0);
+		}
+
 		// Ball Launcher
-		if (revDigitalInput)
+		if (revDigitalInput || shootInput)
 			ballLauncher.runVelocity(true);
 		else
 			ballLauncher.runPercentage(revAnalogInput);
 
 		// Ball Storage
 		if (forceIntakeInput) {
-			manipController.setRumble(RumbleType.kRightRumble, RUMBLE);
 			ballStorage.runIntake(1);
 			ballStorage.runStorage(1);
 			ballStorage.runFeed(1);
 		}
 		else if (forceOutakeInput) {
-			manipController.setRumble(RumbleType.kLeftRumble, RUMBLE);
 			ballStorage.runIntake(-1);
 			ballStorage.runStorage(-1);
 			ballStorage.runFeed(-1);
 		}
 		else if (shootInput) {
-			ballStorage.runIntake(true);
-			ballStorage.runStorage(true);
-			ballStorage.runFeed(true);
+			boolean isRev = ballLauncher.getRev();
+			ballStorage.runIntake(isRev);
+			ballStorage.runStorage(isRev);
+			ballStorage.runFeed(isRev);
+		}
+		else if (stopAutoInput) {
+			ballStorage.runStorage(false);
+			ballStorage.runFeed(false);
+			ballStorage.runIntake(false);
 		}
 		else {
 			ballStorage.runAutomatic();
-
-			manipController.setRumble(RumbleType.kLeftRumble, 0);
-			manipController.setRumble(RumbleType.kRightRumble, 0);
 		}
 
 		// Drive Train
 		double speed = slowInput ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;
-		backLeft.set(speed * (-(-xInput + yInput - zInput)));
+		backLeft.set(speed * (-xInput + yInput - zInput));
 		backRight.set(speed * (xInput + yInput + zInput));
-		frontLeft.set(speed * (-(xInput + yInput - zInput)));
+		frontLeft.set(speed * (xInput + yInput - zInput));
 		frontRight.set(speed * (-xInput + yInput + zInput));		
 	}
 
@@ -205,7 +228,7 @@ public class Robot extends TimedRobot {
 		boolean feedInput = driveController.getXButton() || driveController.getYButton();
 
 		double leftInput = driveController.getLeftY();
-		double rightInput = -driveController.getRightY();
+		double rightInput = driveController.getRightY();
 
 		// Deadband
 		if (Math.abs(leftInput) < DEADBAND)
@@ -217,7 +240,7 @@ public class Robot extends TimedRobot {
 		
 		// Ball Launcher
 		if (revDigitalInput)
-			ballLauncher.runPercentage(true);
+			ballLauncher.runVelocity(true);
 		else
 			ballLauncher.runPercentage(revAnalogInput);
 

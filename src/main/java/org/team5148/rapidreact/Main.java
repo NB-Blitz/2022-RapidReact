@@ -1,4 +1,4 @@
-package com.team5148.rapidreact;
+package org.team5148.rapidreact;
 
 import edu.wpi.first.wpilibj.RobotBase;
 

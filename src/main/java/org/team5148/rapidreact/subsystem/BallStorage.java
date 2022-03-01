@@ -1,11 +1,13 @@
-package com.team5148.rapidreact;
+package org.team5148.rapidreact.subsystem;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.team5148.rapidreact.config.DefaultSpeed;
-import com.team5148.rapidreact.config.MotorIDs;
+
+import org.team5148.rapidreact.NTManager;
+import org.team5148.rapidreact.config.DefaultSpeed;
+import org.team5148.rapidreact.config.MotorIDs;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 

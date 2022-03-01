@@ -1,4 +1,4 @@
-package com.team5148.lib;
+package org.team5148.lib;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;

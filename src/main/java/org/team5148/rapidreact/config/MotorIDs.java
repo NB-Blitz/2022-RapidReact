@@ -1,4 +1,4 @@
-package com.team5148.rapidreact.config;
+package org.team5148.rapidreact.config;
 
 public class MotorIDs {
     public static final int DEFAULT = 0;
