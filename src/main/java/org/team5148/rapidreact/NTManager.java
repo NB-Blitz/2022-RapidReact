@@ -5,8 +5,10 @@ import org.team5148.rapidreact.config.DefaultSpeed;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 /**
  * Network Tables Singleton
@@ -26,8 +28,6 @@ public class NTManager {
     public NetworkTableEntry autoXInput = autoTab.add("X Input", 0).getEntry();
     public NetworkTableEntry autoYInput = autoTab.add("Y Input", 0).getEntry();
     public NetworkTableEntry autoZInput = autoTab.add("Z Input", 0).getEntry();
-    public NetworkTableEntry autoXPos = autoTab.add("X Position", 0).getEntry();
-    public NetworkTableEntry autoYPos = autoTab.add("Y Position", 0).getEntry();
 
     // Ball
     public NetworkTableInstance ntinst = NetworkTableInstance.getDefault();
@@ -56,6 +56,12 @@ public class NTManager {
     public NetworkTableEntry storageSpeed = storageTab.add("Storage Speed", DefaultSpeed.STORAGE).getEntry();
     public NetworkTableEntry intakeSpeed = storageTab.add("Intake Speed", DefaultSpeed.INTAKE).getEntry();
     public NetworkTableEntry feedSpeed = storageTab.add("Feed Speed", DefaultSpeed.FEED).getEntry();
+
+    // Odometry
+    public Field2d autoField = new Field2d();
+    public ComplexWidget autoFieldEntry = autoTab.add("Field", autoField);
+    public NetworkTableEntry autoXPos = autoTab.add("X Position", 0).getEntry();
+    public NetworkTableEntry autoYPos = autoTab.add("Y Position", 0).getEntry();
 
     /**
      * Gets the current instance of NTManager

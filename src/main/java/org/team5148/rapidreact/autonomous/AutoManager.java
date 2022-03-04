@@ -60,7 +60,8 @@ public class AutoManager {
      * Updates all auto routines
      * @return Robot Inputs for Autonomous
      */
-    public AutoInput update() {        
+    public AutoInput update() {   
+
         // Sensors
         gyroAngle = navx.getAngle();
         maxAccel = navx.getAccelFullScaleRangeG();
@@ -87,6 +88,8 @@ public class AutoManager {
         AutoInput input = new AutoInput();
         if (isAborted)
             input = new AutoInput();
+        else if (mode == 0)
+            input = mode0();
         else if (mode == 1)
             input = mode1();
 
@@ -99,6 +102,7 @@ public class AutoManager {
         nt.autoZInput.setDouble(input.move.z);
         nt.autoXPos.setDouble(odomX);
         nt.autoYPos.setDouble(odomY);
+        nt.autoField.setRobotPose(odometry.getPoseMeters());
 
         return input;
     }
@@ -205,9 +209,10 @@ public class AutoManager {
     }
 
     public Vector3 driveTo(double x, double y, double speed) {
+        double deltaAngle = gyroAngle - Math.atan2(odomY - y, odomY - x);
         Vector3 output = new Vector3(
-            Math.sin(Math.toRadians(gyroAngle)) * speed,
-            Math.cos(Math.toRadians(gyroAngle)) * speed,
+            Math.sin(Math.toRadians(deltaAngle)) * speed,
+            Math.cos(Math.toRadians(deltaAngle)) * speed,
             0
         );
         return output;
@@ -217,6 +222,16 @@ public class AutoManager {
         odometry.resetPosition(new Pose2d(), Rotation2d.fromDegrees(-gyroAngle));
         timer.reset();
         step++;
+    }
+
+    public AutoInput mode0() {
+        AutoInput input = new AutoInput();
+        switch (step) {
+            case 0:
+                input.move = driveToBall(0, -1, 180, 0.2);
+                break;
+        }
+        return input;
     }
 
     public AutoInput mode1() {

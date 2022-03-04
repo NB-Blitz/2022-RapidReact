@@ -10,42 +10,42 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 public class PIDSparkMax {
+
+    // Config
     public String name;
     public int id;
     public PIDConfig pidConfig;
 
+    // Motor
     private CANSparkMax motor;
     private RelativeEncoder encoder;
     private SparkMaxPIDController pidController;
     
-    private ShuffleboardTab shuffleboardTab;
-    private NetworkTableEntry setVelocityEntry;
-    private NetworkTableEntry velocityEntry;
-    private NetworkTableEntry pEntry;
-    private NetworkTableEntry iEntry;
-    private NetworkTableEntry dEntry;
-    private NetworkTableEntry ffEntry;
-    private NetworkTableEntry minOutputEntry;
-    private NetworkTableEntry maxOutputEntry;
+    // Network Tables
+    private ShuffleboardTab shuffleboardTab = Shuffleboard.getTab(name);
+    private NetworkTableEntry setVelocityEntry = shuffleboardTab.add("Set Velocity", 0).getEntry();
+    private NetworkTableEntry velocityEntry = shuffleboardTab.add("Current Velocity", 0).getEntry();
+    private NetworkTableEntry pEntry = shuffleboardTab.add("Proportional", 0).getEntry();
+    private NetworkTableEntry iEntry = shuffleboardTab.add("Integral", 0).getEntry();
+    private NetworkTableEntry dEntry = shuffleboardTab.add("Derivative", 0).getEntry();
+    private NetworkTableEntry ffEntry = shuffleboardTab.add("Feed Forward", 0).getEntry();
+    private NetworkTableEntry minOutputEntry = shuffleboardTab.add("Min Output", 0).getEntry();
+    private NetworkTableEntry maxOutputEntry = shuffleboardTab.add("Max Output", 0).getEntry();
 
+    /**
+     * Controls a SparkMAX using PID
+     * @param name - Name for Network Tables
+     * @param id - CAN ID
+     * @param pidConfig - PID Configuration
+     */
     public PIDSparkMax(String name, int id, PIDConfig pidConfig) {
         this.name = name;
         this.id = id;
-        this.pidConfig = pidConfig;
         
         motor = new CANSparkMax(id, MotorType.kBrushless);
         encoder = motor.getEncoder();
         pidController = motor.getPIDController();
-
-        shuffleboardTab = Shuffleboard.getTab(name);
-        setVelocityEntry = shuffleboardTab.add("Set Velocity", 0).getEntry();
-        velocityEntry = shuffleboardTab.add("Current Velocity", 0).getEntry();
-        pEntry = shuffleboardTab.add("Proportional", pidConfig.p).getEntry();
-        iEntry = shuffleboardTab.add("Integral", pidConfig.p).getEntry();
-        dEntry = shuffleboardTab.add("Derivative", pidConfig.p).getEntry();
-        ffEntry = shuffleboardTab.add("Feed Forward", pidConfig.p).getEntry();
-        minOutputEntry = shuffleboardTab.add("Min Output", pidConfig.minOutput).getEntry();
-        maxOutputEntry = shuffleboardTab.add("Max Output", pidConfig.maxOutput).getEntry();
+        setConfig(pidConfig);
     }
 
     /**
@@ -59,6 +59,13 @@ public class PIDSparkMax {
         pidController.setFF(pidConfig.ff);
         pidController.setOutputRange(pidConfig.minOutput, pidConfig.maxOutput);
         this.pidConfig = pidConfig;
+
+        pEntry.setDouble(pidConfig.p);
+        iEntry.setDouble(pidConfig.i);
+        dEntry.setDouble(pidConfig.d);
+        ffEntry.setDouble(pidConfig.ff);
+        minOutputEntry.setDouble(pidConfig.minOutput);
+        maxOutputEntry.setDouble(pidConfig.maxOutput);
     }
 
     /**
@@ -66,9 +73,9 @@ public class PIDSparkMax {
      * @param speed - Speed in Percent [-1 - 1]
      */
     public void setPercentage(double speed) {
+        velocityEntry.setDouble(getVelocity());
         setVelocityEntry.setDouble(0);
         motor.set(speed);
-        update();
     }
 
     /**
@@ -76,8 +83,12 @@ public class PIDSparkMax {
      * @param velocity - Velocity in RPM
      */
     public void setVelocity(double velocity) {
+        velocityEntry.setDouble(getVelocity());
         setVelocityEntry.setDouble(velocity);
-        update();
+        pidController.setReference(
+            velocity,
+            CANSparkMax.ControlType.kVelocity
+        );
     }
 
     /**
@@ -95,39 +106,6 @@ public class PIDSparkMax {
      */
     public boolean getRev(double rpmRange) {
         return Math.abs(getVelocity() - setVelocityEntry.getDouble(0)) < rpmRange;
-    }
-
-    private void update() {
-        velocityEntry.setDouble(getVelocity());
-        pidController.setReference(
-            setVelocityEntry.getDouble(0),
-            CANSparkMax.ControlType.kVelocity
-        );
-
-        // PID
-        double kP = pEntry.getDouble(pidConfig.p);
-        double kI = iEntry.getDouble(pidConfig.i);
-        double kD = dEntry.getDouble(pidConfig.d);
-        double kFF = ffEntry.getDouble(pidConfig.ff);
-        double minOutput = minOutputEntry.getDouble(pidConfig.minOutput);
-        double maxOutput = maxOutputEntry.getDouble(pidConfig.maxOutput);
-        
-        if (kP != pidConfig.p||
-            kI != pidConfig.i ||
-            kD != pidConfig.d ||
-            kFF != pidConfig.ff ||
-            minOutput != pidConfig.minOutput ||
-            maxOutput != pidConfig.maxOutput) {
-
-            pidConfig.p = kP;
-            pidConfig.i = kI;
-            pidConfig.d = kD;
-            pidConfig.ff = kFF;
-            pidConfig.minOutput = minOutput;
-            pidConfig.maxOutput = maxOutput;
-
-            setConfig(pidConfig);
-        }
     }
 
     /**

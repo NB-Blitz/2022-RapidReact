@@ -167,7 +167,7 @@ public class Robot extends TimedRobot {
 		if (revDigitalInput || shootInput)
 			ballLauncher.runVelocity(true);
 		else
-			ballLauncher.runPercentage(revAnalogInput);
+			ballLauncher.runVelocity(false);
 
 		// Ball Storage
 		if (forceIntakeInput) {
@@ -220,6 +220,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void testPeriodic() {
 
+		/*
 		// Inputs
 		double revAnalogInput = Math.max(driveController.getLeftTriggerAxis(), driveController.getRightTriggerAxis());
 		boolean revDigitalInput = driveController.getLeftBumper() || driveController.getRightBumper();
@@ -254,6 +255,9 @@ public class Robot extends TimedRobot {
 		backLeft.set(leftInput);
 		frontRight.set(rightInput);
 		backRight.set(rightInput);
+		*/
 
+		ballLauncher.runVelocity(1000, 0);
+		//ballLauncher.runPercentage(driveController.getLeftTriggerAxis(), 0);
 	}
 }

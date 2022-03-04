@@ -7,7 +7,7 @@ public class DefaultSpeed {
     public static final double STORAGE = 0.5;
     public static final double FEED = 0.5;
 
-    public static final double ROLL = 20;
-    public static final double LAUNCHER_VELOCITY = 100;
+    public static final double ROLL = 0;
+    public static final double LAUNCHER_VELOCITY = 1400;
     public static final double LAUNCHER_PERCENT = 0.5;
 }

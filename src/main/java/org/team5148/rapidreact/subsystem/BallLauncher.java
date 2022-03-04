@@ -9,15 +9,11 @@ import org.team5148.rapidreact.config.MotorIDs;
 public class BallLauncher {
     private static final double REV_RANGE = 100;
 
-    private PIDConfig pidConfig = new PIDConfig(0, 0, 0, 0, 0, 1);
+    private PIDConfig pidConfig = new PIDConfig(0.00001, 0.0000001, 0.000025, 0.00001, -1, 1);
     private PIDSparkMax topMotor = new PIDSparkMax("Top Launcher", MotorIDs.LAUNCHER_TOP, pidConfig);
     private PIDSparkMax bottomMotor = new PIDSparkMax("Bottom Launcher", MotorIDs.LAUNCHER_BOTTOM, pidConfig);
 
     private NTManager nt = NTManager.getInstance();
-
-    public BallLauncher() {
-        bottomMotor.setInverted(true);
-    }
 
     /**
      * Runs the launcher at the default speed using percentage
