@@ -23,7 +23,7 @@ public class NTManager {
     public NetworkTableEntry autoBallAngle = autoTab.add("Ball Angle", 0).getEntry();
     public NetworkTableEntry autoGoalAngle = autoTab.add("Goal Angle", 0).getEntry();
     public NetworkTableEntry autoAccel = autoTab.add("Acceleration", 0).getEntry();
-    public NetworkTableEntry autoMode = autoTab.add("Mode", 0).getEntry();
+    public NetworkTableEntry autoMode = autoTab.add("Mode", 1).getEntry();
     public NetworkTableEntry autoStep = autoTab.add("Step", 0).getEntry();
     public NetworkTableEntry autoXInput = autoTab.add("X Input", 0).getEntry();
     public NetworkTableEntry autoYInput = autoTab.add("Y Input", 0).getEntry();
@@ -48,6 +48,7 @@ public class NTManager {
     public ShuffleboardTab launcherTab = Shuffleboard.getTab("Launcher");
     public NetworkTableEntry launcherSetVel = launcherTab.add("Set Velocity", DefaultSpeed.LAUNCHER_VELOCITY).getEntry();
     public NetworkTableEntry launcherRoll = launcherTab.add("Roll Velocity", DefaultSpeed.ROLL_VELOCITY).getEntry();
+    public NetworkTableEntry launcherRev = launcherTab.add("Is Rev", false).getEntry();
 
     // Storage
     public ShuffleboardTab storageTab = Shuffleboard.getTab("Storage");
@@ -57,11 +58,15 @@ public class NTManager {
     public NetworkTableEntry intakeSpeed = storageTab.add("Intake Speed", DefaultSpeed.INTAKE).getEntry();
     public NetworkTableEntry feedSpeed = storageTab.add("Feed Speed", DefaultSpeed.FEED).getEntry();
 
-    // Odometry
-    public Field2d autoField = new Field2d();
-    public ComplexWidget autoFieldEntry = autoTab.add("Field", autoField);
-    public NetworkTableEntry autoXPos = autoTab.add("X Position", 0).getEntry();
-    public NetworkTableEntry autoYPos = autoTab.add("Y Position", 0).getEntry();
+    // Climber
+    public ShuffleboardTab climberTab = Shuffleboard.getTab("Climber");
+    public NetworkTableEntry climberSpeed = climberTab.add("Speed", DefaultSpeed.CLIMBER).getEntry();
+    public NetworkTableEntry climberPos = climberTab.add("Position", 0).getEntry();
+
+    // Simulation
+    public ShuffleboardTab simTab = Shuffleboard.getTab("Simulation");
+    public Field2d simField = new Field2d();
+    public ComplexWidget simFieldEntry = simTab.add("Field", simField);
 
     /**
      * Gets the current instance of NTManager

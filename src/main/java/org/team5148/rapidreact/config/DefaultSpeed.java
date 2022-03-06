@@ -6,6 +6,7 @@ public class DefaultSpeed {
     public static final double INTAKE = 0.5;
     public static final double STORAGE = 0.4;
     public static final double FEED = 0.5;
+    public static final double CLIMBER = 0.5;
 
     public static final double ROLL_VELOCITY = 0; // 1000
     public static final double LAUNCHER_VELOCITY = 1500; // 3500

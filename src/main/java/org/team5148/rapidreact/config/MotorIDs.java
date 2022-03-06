@@ -12,4 +12,5 @@ public class MotorIDs {
     public static final int RIGHT_STORAGE = 8; // Talon
     public static final int LAUNCHER_BOTTOM = 9;
     public static final int LAUNCHER_TOP = 10;
+    public static final int CLIMBER = 11;
 }

@@ -76,6 +76,8 @@ public class BallLauncher {
      * @return True if the launcher is up to speed. False otherwise.
      */
     public boolean getRev() {
-        return topMotor.getRev(REV_RANGE) && bottomMotor.getRev(REV_RANGE);
+        boolean isRev = topMotor.getRev(REV_RANGE) && bottomMotor.getRev(REV_RANGE);
+        nt.launcherRev.setBoolean(isRev);
+        return isRev;
     }
 }
