@@ -9,7 +9,7 @@ import org.team5148.rapidreact.config.MotorIDs;
 public class BallLauncher {
     private static final double REV_RANGE = 100;
 
-    private PIDConfig pidConfig = new PIDConfig(0.00001, 0.0000001, 0.000025, 0.00001, -1, 1);
+    private PIDConfig pidConfig = new PIDConfig(0.0003, 0.0000005, 0.0001, 0.0000001, -1, 1);
     private PIDSparkMax topMotor = new PIDSparkMax("Top Launcher", MotorIDs.LAUNCHER_TOP, pidConfig);
     private PIDSparkMax bottomMotor = new PIDSparkMax("Bottom Launcher", MotorIDs.LAUNCHER_BOTTOM, pidConfig);
 
@@ -28,8 +28,7 @@ public class BallLauncher {
      * @param speed - Speed to set to [-1 - 1]
      */
     public void runPercentage(double speed){
-        double roll = nt.launcherRoll.getDouble(DefaultSpeed.ROLL);
-        runPercentage(speed + roll, speed - roll);
+        runPercentage(speed, speed);
     }
 
     /**
@@ -48,12 +47,9 @@ public class BallLauncher {
      */
     public void runVelocity(boolean isRunning) {
         double velocity = nt.launcherSetVel.getDouble(DefaultSpeed.LAUNCHER_VELOCITY);
-        double roll = nt.launcherRoll.getDouble(DefaultSpeed.ROLL);
+        double speed = isRunning ? velocity : 0;
 
-        double topSpeed = isRunning ? velocity + roll : 0;
-        double bottomSpeed = isRunning ? velocity - roll : 0;
-
-        runVelocity(topSpeed, bottomSpeed);
+        runVelocity(speed);
     }
 
     /**
@@ -61,7 +57,7 @@ public class BallLauncher {
      * @param speed - Velocity to set to in RPM
      */
     public void runVelocity(double velocity){
-        double roll = nt.launcherRoll.getDouble(DefaultSpeed.ROLL);
+        double roll = nt.launcherRoll.getDouble(DefaultSpeed.ROLL_VELOCITY);
         runVelocity(velocity + roll, velocity - roll);
     }
     
@@ -72,7 +68,7 @@ public class BallLauncher {
      */
     public void runVelocity(double topVelocity, double bottomVelocity) {
         topMotor.setVelocity(topVelocity);
-        bottomMotor.setVelocity(bottomVelocity);
+        bottomMotor.setVelocity(-bottomVelocity);
     }
 
     /**

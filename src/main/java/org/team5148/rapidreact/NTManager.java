@@ -47,7 +47,7 @@ public class NTManager {
     // Launcher
     public ShuffleboardTab launcherTab = Shuffleboard.getTab("Launcher");
     public NetworkTableEntry launcherSetVel = launcherTab.add("Set Velocity", DefaultSpeed.LAUNCHER_VELOCITY).getEntry();
-    public NetworkTableEntry launcherRoll = launcherTab.add("Roll", DefaultSpeed.ROLL).getEntry();
+    public NetworkTableEntry launcherRoll = launcherTab.add("Roll Velocity", DefaultSpeed.ROLL_VELOCITY).getEntry();
 
     // Storage
     public ShuffleboardTab storageTab = Shuffleboard.getTab("Storage");

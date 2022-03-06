@@ -22,15 +22,15 @@ public class PIDSparkMax {
     private SparkMaxPIDController pidController;
     
     // Network Tables
-    private ShuffleboardTab shuffleboardTab = Shuffleboard.getTab(name);
-    private NetworkTableEntry setVelocityEntry = shuffleboardTab.add("Set Velocity", 0).getEntry();
-    private NetworkTableEntry velocityEntry = shuffleboardTab.add("Current Velocity", 0).getEntry();
-    private NetworkTableEntry pEntry = shuffleboardTab.add("Proportional", 0).getEntry();
-    private NetworkTableEntry iEntry = shuffleboardTab.add("Integral", 0).getEntry();
-    private NetworkTableEntry dEntry = shuffleboardTab.add("Derivative", 0).getEntry();
-    private NetworkTableEntry ffEntry = shuffleboardTab.add("Feed Forward", 0).getEntry();
-    private NetworkTableEntry minOutputEntry = shuffleboardTab.add("Min Output", 0).getEntry();
-    private NetworkTableEntry maxOutputEntry = shuffleboardTab.add("Max Output", 0).getEntry();
+    private ShuffleboardTab shuffleboardTab;
+    private NetworkTableEntry setVelocityEntry;
+    private NetworkTableEntry velocityEntry;
+    private NetworkTableEntry pEntry;
+    private NetworkTableEntry iEntry;
+    private NetworkTableEntry dEntry;
+    private NetworkTableEntry ffEntry;
+    private NetworkTableEntry minOutputEntry;
+    private NetworkTableEntry maxOutputEntry;
 
     /**
      * Controls a SparkMAX using PID
@@ -41,10 +41,21 @@ public class PIDSparkMax {
     public PIDSparkMax(String name, int id, PIDConfig pidConfig) {
         this.name = name;
         this.id = id;
+
+        shuffleboardTab = Shuffleboard.getTab(name);
+        setVelocityEntry = shuffleboardTab.add("Set Velocity", 0).getEntry();
+        velocityEntry = shuffleboardTab.add("Current Velocity", 0).getEntry();
+        pEntry = shuffleboardTab.add("Proportional", 0).getEntry();
+        iEntry = shuffleboardTab.add("Integral", 0).getEntry();
+        dEntry = shuffleboardTab.add("Derivative", 0).getEntry();
+        ffEntry = shuffleboardTab.add("Feed Forward", 0).getEntry();
+        minOutputEntry = shuffleboardTab.add("Min Output", 0).getEntry();
+        maxOutputEntry = shuffleboardTab.add("Max Output", 0).getEntry();
         
         motor = new CANSparkMax(id, MotorType.kBrushless);
         encoder = motor.getEncoder();
         pidController = motor.getPIDController();
+        motor.setOpenLoopRampRate(0.1);
         setConfig(pidConfig);
     }
 

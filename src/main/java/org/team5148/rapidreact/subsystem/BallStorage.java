@@ -22,22 +22,18 @@ public class BallStorage {
     private DigitalInput lineBreakEnd = new DigitalInput(1);
     private NTManager nt = NTManager.getInstance();
 
+    private boolean beginValue = false;
+    private boolean endValue = false;
+
     /**
      * Runs storage motors based on the line break sensors
      */
     public void runAutomatic() {
-        boolean start = !lineBreakBegin.get();
-        boolean end = !lineBreakEnd.get();
-
-        nt.lineBreak1.setBoolean(start);
-        nt.lineBreak2.setBoolean(end);
+        update();
         
-        if (end)
-            runStorage(false);
-        else
-            runStorage(true);
-        
-        runIntake(!(end && start));
+        runStorage(!endValue);
+        runIntake(!(endValue && beginValue));
+        runFeed(false);
     }
 
     /**
@@ -56,6 +52,7 @@ public class BallStorage {
     public void runStorage(double speed){
         leftStorageMotor.set(ControlMode.PercentOutput, speed);
         rightStorageMotor.set(ControlMode.PercentOutput, speed);
+        update();
     }
 
     /**
@@ -90,5 +87,13 @@ public class BallStorage {
      */
     public void runFeed(double speed) {
         feedMotor.set(ControlMode.PercentOutput, -speed);
+    }
+
+    private void update() {
+        beginValue = !lineBreakBegin.get();
+        endValue = !lineBreakEnd.get();
+
+        nt.lineBreak1.setBoolean(beginValue);
+        nt.lineBreak2.setBoolean(endValue);
     }
 }

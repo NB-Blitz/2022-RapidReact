@@ -21,6 +21,8 @@ public class Robot extends TimedRobot {
 	private final double RUMBLE = 0.2;
 	private final double RAMP = 0.3;
 
+	private boolean isFeeding = false;
+
 	// Controllers
 	XboxController driveController = new XboxController(0);
 	XboxController manipController = new XboxController(1);
@@ -32,7 +34,7 @@ public class Robot extends TimedRobot {
 	CANSparkMax frontRight = new CANSparkMax(MotorIDs.FRONT_RIGHT, MotorType.kBrushless);
 
 	// Subsystems
-	AutoManager autoManager = new AutoManager(frontLeft, frontRight, backLeft, backRight);
+	AutoManager autoManager = new AutoManager();
 	BallLauncher ballLauncher = new BallLauncher();
 	BallStorage ballStorage = new BallStorage();
 
@@ -182,9 +184,11 @@ public class Robot extends TimedRobot {
 		}
 		else if (shootInput) {
 			boolean isRev = ballLauncher.getRev();
-			ballStorage.runIntake(isRev);
-			ballStorage.runStorage(isRev);
-			ballStorage.runFeed(isRev);
+			if (isRev)
+				isFeeding = true;
+			ballStorage.runIntake(isFeeding);
+			ballStorage.runStorage(isFeeding);
+			ballStorage.runFeed(isFeeding);
 		}
 		else if (stopAutoInput) {
 			ballStorage.runStorage(false);
@@ -193,6 +197,7 @@ public class Robot extends TimedRobot {
 		}
 		else {
 			ballStorage.runAutomatic();
+			isFeeding = false;
 		}
 
 		// Drive Train
