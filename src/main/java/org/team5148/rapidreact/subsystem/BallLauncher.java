@@ -16,49 +16,23 @@ public class BallLauncher {
     private NTManager nt = NTManager.getInstance();
 
     /**
-     * Runs the launcher at the default speed using percentage
-     * @param isRunning - Whether or not the launcher is running
-     */
-    public void runPercentage(boolean isRunning) {
-        runPercentage(isRunning ? DefaultSpeed.LAUNCHER_PERCENT : 0);
-    }
-
-    /**
-     * Runs the launcher at a set speed
-     * @param speed - Speed to set to [-1 - 1]
-     */
-    public void runPercentage(double speed){
-        runPercentage(speed, speed);
-    }
-
-    /**
-     * Runs each launcher motor independently
-     * @param topSpeed - Speed of the top motor [-1 - 1]
-     * @param bottomSpeed - Speed of the bottom motor [-1 - 1]
-     */
-    public void runPercentage(double topSpeed, double bottomSpeed) {
-        topMotor.setPercentage(topSpeed);
-        bottomMotor.setPercentage(bottomSpeed);
-    }
-
-    /**
      * Runs the launcher at the default speed using PID
      * @param isRunning - Whether or not the launcher is running
      */
-    public void runVelocity(boolean isRunning) {
+    public void run(boolean isRunning) {
         double velocity = nt.launcherSetVel.getDouble(DefaultSpeed.LAUNCHER_VELOCITY);
         double speed = isRunning ? velocity : 0;
 
-        runVelocity(speed);
+        run(speed);
     }
 
     /**
      * Runs the launcher at a set velocity
      * @param speed - Velocity to set to in RPM
      */
-    public void runVelocity(double velocity){
+    public void run(double velocity){
         double roll = nt.launcherRoll.getDouble(DefaultSpeed.ROLL_VELOCITY);
-        runVelocity(velocity + roll, velocity - roll);
+        run(velocity + roll, velocity - roll);
     }
     
     /**
@@ -66,7 +40,7 @@ public class BallLauncher {
      * @param topVelocity - Velocity of the top motor in RPM
      * @param bottomVelocity - Velocity of the bottom motor in RPM
      */
-    public void runVelocity(double topVelocity, double bottomVelocity) {
+    public void run(double topVelocity, double bottomVelocity) {
         topMotor.setVelocity(topVelocity);
         bottomMotor.setVelocity(-bottomVelocity);
     }

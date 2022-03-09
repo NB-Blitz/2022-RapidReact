@@ -5,13 +5,14 @@ import com.kauailabs.navx.frc.AHRS;
 import org.team5148.lib.Vector3;
 import org.team5148.rapidreact.NTManager;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.I2C.Port;
 
 public class AutoManager {
     private final double BALL_CAM_FOV = 50;
     private final double GOAL_CAM_FOV = 50;
-    private final double ABORT_ACCEL = 2;
+    private final double ABORT_ACCEL = 5;
 
     // Sensors
     private Timer timer = new Timer();
@@ -20,12 +21,13 @@ public class AutoManager {
 
     // State
     private int step = 0;
+    private boolean isAborted = false;
+    private boolean isBlueAlliance = false;
     private double maxAccel = 0;
     private double gyroAngle = 0;
     private double ballAngle = 0;
-    private double goalAngle = 0;
     private double orginAngle = 0;
-    private boolean isAborted = false;
+    public double goalAngle = 0;
 
     /**
      * Updates all auto routines
@@ -54,8 +56,12 @@ public class AutoManager {
         AutoInput input = new AutoInput();
         if (isAborted)
             input = new AutoInput();
+        else if (mode == 0)
+            input = mode0();
         else if (mode == 1)
             input = mode1();
+        else if (mode == 2)
+            input = mode2();
 
         // Network Tables
         nt.autoStep.setNumber(step);
@@ -77,9 +83,10 @@ public class AutoManager {
         gyroAngle = 0;
         orginAngle = 0;
         isAborted = false;
+        isBlueAlliance = DriverStation.getAlliance() == DriverStation.Alliance.Blue;
         timer.reset();
         timer.start();
-        //navx.reset();
+        navx.reset();
     }
 
     /**
@@ -89,7 +96,7 @@ public class AutoManager {
      */
     public Vector3 rotateTo(double angle) {
         double deltaAngle = gyroAngle - angle;
-        double power = deltaAngle / 60;
+        double power = deltaAngle / 80;
 
         if (power > 1)
             power = 1;
@@ -156,35 +163,61 @@ public class AutoManager {
         return output;
     }
     
+    /**
+     * Increments step and resets timer
+     */
     private void nextStep() {
         timer.reset();
         step++;
         orginAngle = gyroAngle;
     }
 
-    public AutoInput mode1() {
+    private AutoInput mode0() {
         AutoInput input = new AutoInput();
         switch (step) {
             case 0:
-                input.move = driveTo(0, -.8);
-                if (timer.get() > 0.2)
+                input.move = driveTo(0, .5);
+                input.move.z = rotateTo(180).z;
+                if (timer.get() > 3)
                     nextStep();
                 break;
             case 1:
+                input.move = driveTo(0, .5);
+                input.move.z = rotateTo(0).z;
+                if (timer.get() > 3)
+                    nextStep();
+                break;
+            default:
+                step = 0;
+                break;
+        }
+        return input;
+    }
+
+    private AutoInput mode1() {
+        AutoInput input = new AutoInput();
+        switch (step) {
+            case 0:
+                input.move = driveTo(.2, -.5);
+                if (timer.get() > 0.3)
+                    nextStep();
+                break;
+            case 1:
+                input.move = rotateToGoal();
                 input.isShooting = true;
                 if (timer.get() > 2)
                     nextStep();
                 break;
             case 2:
                 input.move = driveTo(0, -.2);
-                input.move.z = rotateTo(120).z;
-                if (timer.get() > 1)
+                input.move.z = rotateTo(160).z;
+                if (timer.get() > 1.2)
                     nextStep();
                 break;
             case 3:
-                input.move = driveTo(.2, -.5);
-                input.move.z = rotateTo(290).z;
-                if (timer.get() > 1)
+                input.move = driveTo(.4, -.2);
+                input.move.z = rotateTo(270).z;
+                if (timer.get() > 1.2)
                     nextStep();
                 break;
             case 4:
@@ -199,13 +232,13 @@ public class AutoManager {
                     nextStep();
                 break;
             case 6:
-                input.move = driveTo(-.4, -.5);
+                input.move = driveTo(-.5, -.6);
                 input.move.z = rotateTo(210).z;
                 if (timer.get() > 1)
                     nextStep();
                 break;
             case 7:
-                if (timer.get() > 1)
+                if (timer.get() > 3)
                     nextStep();
                 break;
             case 8:
@@ -215,6 +248,56 @@ public class AutoManager {
                     nextStep();
                 break;
             case 9:
+                input.move = rotateToGoal();
+                input.isShooting = true;
+                if (timer.get() > 2)
+                    nextStep();
+                break;
+        }
+        return input;
+    }
+
+    private AutoInput mode2() {
+        AutoInput input = new AutoInput();
+        switch (step) {
+            case 0:
+                input.move = driveTo(0, .6);
+                if (timer.get() > .5)
+                    nextStep();
+                break;
+            case 1:
+                input.move = rotateTo(180);
+                if (timer.get() > 1)
+                    nextStep();
+                break;
+            case 2:
+                input.move = rotateToGoal();
+                input.isShooting = true;
+                if (timer.get() > 2)
+                    nextStep();
+                break;
+            case 3:
+                input.move = driveTo(.51, -.1);
+                input.move.z = rotateTo(285).z;
+                if (timer.get() > 2)
+                    nextStep();
+                break;
+            case 4:
+                if (timer.get() > 2)
+                    nextStep();
+                break;
+            case 5:
+                input.move = driveTo(-.3, -.5);
+                input.move.z = rotateTo(155).z;
+                if (timer.get() > 1)
+                    nextStep();
+                break;
+            case 6:
+                input.move = rotateTo(125);
+                if (timer.get() > .5)
+                    nextStep();
+                break;
+            case 7:
                 input.move = rotateToGoal();
                 input.isShooting = true;
                 if (timer.get() > 2)

@@ -74,17 +74,18 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousPeriodic() {
 		AutoInput input = autoManager.update();
+		autoManager.goalAngle = sim.getGoalAngle();
 		
 		// Ball Storage / Launcher
 		if (input.isShooting) {
-			ballLauncher.runVelocity(true);
+			ballLauncher.run(true);
 
 			boolean isRev = ballLauncher.getRev();
 			ballStorage.runFeed(isRev);
 			ballStorage.runIntake(isRev);
 			ballStorage.runStorage(isRev);
 		} else {
-			ballLauncher.runVelocity(0);
+			ballLauncher.run(0);
 			ballStorage.runAutomatic();
 		}
 		
@@ -123,8 +124,8 @@ public class Robot extends TimedRobot {
 		// Manipulator Input
 		double climberInput = manipController.getRightY();
 		boolean revDigitalInput = manipController.getLeftBumper() || manipController.getRightBumper();
-		boolean shootInput = manipController.getAButton() || manipController.getBButton();
-		boolean stopAutoInput = manipController.getXButton() || manipController.getYButton();
+		boolean shootInput = manipController.getYButton() || manipController.getBButton();
+		boolean intakeInput = manipController.getXButton() || manipController.getAButton();
 		double povInput = manipController.getPOV();
 		boolean forceIntakeInput = povInput == 0;
 		boolean forceOutakeInput = povInput == 180;
@@ -174,9 +175,9 @@ public class Robot extends TimedRobot {
 
 		// Ball Launcher
 		if (revDigitalInput || shootInput)
-			ballLauncher.runVelocity(true);
+			ballLauncher.run(true);
 		else
-			ballLauncher.runVelocity(false);
+			ballLauncher.run(false);
 
 		// Ball Storage
 		if (forceIntakeInput) {
@@ -197,13 +198,18 @@ public class Robot extends TimedRobot {
 			ballStorage.runStorage(isFeeding);
 			ballStorage.runFeed(isFeeding);
 		}
-		else if (stopAutoInput) {
+		else if (intakeInput) {
+			ballStorage.runStorage(true);
+			ballStorage.runFeed(false);
+			ballStorage.runIntake(true);
+		}
+		else {
+			/*
+			ballStorage.runAutomatic();
+			*/
 			ballStorage.runStorage(false);
 			ballStorage.runFeed(false);
 			ballStorage.runIntake(false);
-		}
-		else {
-			ballStorage.runAutomatic();
 			isFeeding = false;
 		}
 
@@ -219,6 +225,7 @@ public class Robot extends TimedRobot {
 
 		// Simulation
 		sim.drive(new Vector3(xInput, yInput, zInput));
+		autoManager.goalAngle = sim.getGoalAngle();
 	}
 
 	/*

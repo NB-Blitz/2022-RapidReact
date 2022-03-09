@@ -8,15 +8,16 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 public class Simulation {
-    private static final double X_SPEED = 0.01;
-    private static final double Y_SPEED = 0.03;
-    private static final double Z_SPEED = 1.8;
+    private static final Vector3 GOAL = new Vector3(315 * 0.0254, 162 * 0.0254, 0);
+    private static final Vector3 POSA_R = new Vector3(8.4, 5.4, 248);
+    private static final Vector3 POSB_R = new Vector3(9.4, 3, 335);
+    private static final Vector3 POSA_B = new Vector3(GOAL.x + GOAL.x - POSA_R.x, GOAL.y + GOAL.y - POSA_R.y, POSA_R.z - 180);
 
-    private static final double X_DAMP = 0.7;
-    private static final double Y_DAMP = 0.7;
-    private static final double Z_DAMP = 0.8;
-
+    private static final Vector3 SPEED = new Vector3(0.02, 0.035, 1.8);
+    private static final Vector3 DAMP = new Vector3(0.7, 0.7, 0.8);
     private static final double JITTER = 0.3;
+    private static final double DEADBAND = 0.05;
+    private static final double G_CONST = 9.8066;
 
     // NavX Sim
     private int simDevice = SimDeviceDataJNI.getSimDeviceHandle("navX-Sensor[0]");
@@ -32,8 +33,16 @@ public class Simulation {
     public void drive(Vector3 input) {
 
         // Random
-        double xSpeed = X_SPEED * (Math.random() * JITTER + 1 - JITTER / 2);
-        double ySpeed = Y_SPEED * (Math.random() * JITTER + 1 - JITTER / 2);
+        double xSpeed = SPEED.x * (Math.random() * JITTER + 1 - JITTER / 2);
+        double ySpeed = SPEED.y * (Math.random() * JITTER + 1 - JITTER / 2);
+
+        // Deadband
+        if (Math.abs(input.x) < DEADBAND)
+            input.x = 0;
+        if (Math.abs(input.y) < DEADBAND)
+            input.y = 0;
+        if (Math.abs(input.z) < DEADBAND)
+            input.z = 0;
 
         // Physics
         double cos = Math.cos(Math.toRadians(pos.z));
@@ -41,12 +50,12 @@ public class Simulation {
         Vector3 accel = new Vector3(
             ((cos * ySpeed * input.y) + (sin * xSpeed * input.x)),
             ((sin * ySpeed * input.y) - (cos * xSpeed * input.x)),
-            Z_SPEED * input.z
+            SPEED.z * input.z
         );
         vel = new Vector3(
-            (vel.x * X_DAMP) + accel.x,
-            (vel.y * Y_DAMP) + accel.y,
-            (vel.z * Z_DAMP) + accel.z
+            (vel.x * DAMP.x) + accel.x,
+            (vel.y * DAMP.y) + accel.y,
+            (vel.z * DAMP.z) + accel.z
         );
         pos = new Vector3(
             pos.x + vel.x,
@@ -56,18 +65,22 @@ public class Simulation {
 
         // Sim Devices
         simAngle.set(orginAngle - pos.z);
-        simAccelX.set(accel.x);
-        simAccelY.set(accel.y);
+        simAccelX.set(accel.x * G_CONST);
+        simAccelY.set(accel.y * G_CONST);
         nt.simField.setRobotPose(new Pose2d(pos.x, pos.y, Rotation2d.fromDegrees(pos.z)));
     }
 
+    public double getGoalAngle() {
+        double angle = orginAngle - Math.toDegrees(Math.atan2(GOAL.y - pos.y, GOAL.x - pos.x));
+        nt.goalVisible.setBoolean(true);
+        nt.autoGoalAngle.setDouble(angle);
+        return angle;
+    }
+
     public void reset() {
-        pos = new Vector3(
-            8.2,
-            5.4,
-            248
-        );
+        pos = POSA_B;
         vel = new Vector3();
         orginAngle = pos.z;
+        nt.simField.getObject("Goal").setPose(new Pose2d(GOAL.x, GOAL.y, Rotation2d.fromDegrees(0)));
     }
 }
