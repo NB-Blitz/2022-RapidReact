@@ -31,17 +31,26 @@ public class BallStorage {
     public void runAutomatic() {
         update();
         
-        runStorage(!endValue);
-        runIntake(!(endValue && beginValue));
-        runFeed(false);
+        if (!endValue)
+            runStorage();
+        else
+            stopStorage();
+
+        stopFeed();
     }
 
     /**
-     * Runs storage motors based on isRunning
-     * @param isRunning - Whether or not to run the storage
+     * Stops the storage motor
      */
-    public void runStorage(boolean isRunning) {
-        double storageSpeed = isRunning ? nt.storageSpeed.getDouble(DefaultSpeed.STORAGE) : 0;
+    public void stopStorage() {
+        runStorage(0);
+    }
+
+    /**
+     * Runs storage motor
+     */
+    public void runStorage() {
+        double storageSpeed = nt.storageSpeed.getDouble(DefaultSpeed.STORAGE);
         runStorage(storageSpeed);
     }
 
@@ -56,28 +65,48 @@ public class BallStorage {
     }
 
     /**
-     * Runs intake motors based on isRunning
-     * @param isRunning - Whether or not to run the intake
+     * Stops the intake motor
      */
-    public void runIntake(boolean isRunning) {
-        double intakeSpeed = isRunning ? nt.intakeSpeed.getDouble(DefaultSpeed.INTAKE) : 0;
+    public void stopIntake() {
+        runIntake(0);
+    }
+
+    /**
+     * Runs the intake motor
+     */
+    public void runIntake() {
+        double intakeSpeed = nt.intakeSpeed.getDouble(DefaultSpeed.INTAKE);
         runIntake(intakeSpeed);
     }
 
     /**
-     * Run intake motors at a given speed
-     * @param speed - Speed to run intake motors at
+     * Runs the intake motor in reverse
+     */
+    public void runOuttake() {
+        double intakeSpeed = -nt.intakeSpeed.getDouble(DefaultSpeed.INTAKE);
+        runIntake(intakeSpeed);
+    }
+
+    /**
+     * Runs the intake motor at a given speed
+     * @param speed - Speed to run intake motor at
      */
     public void runIntake(double speed) {
         intakeMotor.set(-speed);
     }
 
     /**
-     * Runs launcher feed motors based on isRunning
-     * @param isRunning - Whether or not to run the feed to the launcher
+     * Stops the feed motor
      */
-    public void runFeed(boolean isRunning) {
-        double feedSpeed = isRunning ? nt.feedSpeed.getDouble(DefaultSpeed.FEED) : 0;
+    public void stopFeed() {
+        runFeed(0);
+    }
+
+    /**
+     * Runs the feed motor
+     */
+    public void runFeed() {
+        double feedSpeed = nt.feedSpeed.getDouble(DefaultSpeed.FEED);
         runFeed(feedSpeed);
     }
 

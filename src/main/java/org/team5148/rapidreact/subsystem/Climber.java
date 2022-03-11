@@ -10,6 +10,7 @@ import org.team5148.rapidreact.config.MotorIDs;
 
 public class Climber {
     private static final double MAX_POSITION = 10000;
+    private static final double MIN_POSITION = 0;
 
     private CANSparkMax motor = new CANSparkMax(MotorIDs.CLIMBER, MotorType.kBrushless);
     private RelativeEncoder encoder = motor.getEncoder();
@@ -24,6 +25,8 @@ public class Climber {
         double position = encoder.getPosition();
         double input = nt.climberSpeed.getDouble(DefaultSpeed.CLIMBER) * speed;
         if (input > 0 && position >= MAX_POSITION)
+            motor.set(0);
+        else if (input < 0 && position <= MIN_POSITION)
             motor.set(0);
         else
             motor.set(input);

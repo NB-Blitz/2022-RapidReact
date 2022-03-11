@@ -5,27 +5,32 @@ import com.kauailabs.navx.frc.AHRS;
 import org.team5148.lib.Vector3;
 import org.team5148.rapidreact.NTManager;
 
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.I2C.Port;
 
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
+import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
+
 public class AutoManager {
-    private final double BALL_CAM_FOV = 50;
-    private final double GOAL_CAM_FOV = 50;
-    private final double ABORT_ACCEL = 5;
+    public static final double ABORT_ACCEL = 5;
+    public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(6);
+    public static final double TARGET_HEIGHT_METERS = Units.feetToMeters(7);
+    public static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(15);
 
     // Sensors
     private Timer timer = new Timer();
     private AHRS navx = new AHRS(Port.kMXP);
     private NTManager nt = NTManager.getInstance();
+    private PhotonCamera hubCamera = new PhotonCamera("GoalCamera");
 
     // State
     private int step = 0;
     private boolean isAborted = false;
-    private boolean isBlueAlliance = false;
     private double maxAccel = 0;
     private double gyroAngle = 0;
-    private double ballAngle = 0;
     private double orginAngle = 0;
     public double goalAngle = 0;
 
@@ -37,7 +42,6 @@ public class AutoManager {
 
         // Sensors
         gyroAngle = navx.getAngle();
-
         Vector3 accel = new Vector3(
             navx.getWorldLinearAccelX(),
             navx.getWorldLinearAccelY(), 
@@ -83,7 +87,6 @@ public class AutoManager {
         gyroAngle = 0;
         orginAngle = 0;
         isAborted = false;
-        isBlueAlliance = DriverStation.getAlliance() == DriverStation.Alliance.Blue;
         timer.reset();
         timer.start();
         navx.reset();
@@ -108,41 +111,25 @@ public class AutoManager {
     }
 
     /**
-     * Rotates towards a ball
-     * @return Vector3 of controls
-     */
-    public Vector3 rotateToBall() {
-        boolean isVisible = nt.ballVisible.getBoolean(false);
-        if (!isVisible)
-            return new Vector3();
-        
-        double ballX = nt.ballX.getDouble(0);
-        if (ballX != 0) {
-            ballAngle = (ballX * (BALL_CAM_FOV / 2)) + gyroAngle;
-            nt.ballX.setDouble(0);
-            nt.autoBallAngle.setDouble(ballAngle);
-        }
-        Vector3 input = rotateTo(ballAngle);
-        return input;
-    }
-
-    /**
      * Rotates towards a goal
      * @return Vector3 of controls
      */
     public Vector3 rotateToGoal() {
-        boolean isVisible = nt.goalVisible.getBoolean(false);
-        if (!isVisible)
+        PhotonPipelineResult result = hubCamera.getLatestResult();
+        if (!result.hasTargets())
             return new Vector3();
-            
-        double goalX = nt.goalX.getDouble(0);
-        if (goalX != 0) {
-            goalAngle = (goalX * (GOAL_CAM_FOV / 2)) + gyroAngle;
-            nt.goalX.setDouble(0);
-            nt.autoGoalAngle.setDouble(goalAngle);
-        }
-        Vector3 input = rotateTo(goalAngle);
-        return input;
+        PhotonTrackedTarget target = result.getBestTarget();
+        
+        double angle = gyroAngle + target.getYaw();
+        double range = PhotonUtils.calculateDistanceToTargetMeters(
+                CAMERA_HEIGHT_METERS,
+                TARGET_HEIGHT_METERS,
+                CAMERA_PITCH_RADIANS,
+                Units.degreesToRadians(target.getPitch())
+        );
+        nt.autoGoalAngle.setDouble(angle);
+        nt.autoGoalRange.setDouble(range);
+        return rotateTo(angle);
     }
 
     /**

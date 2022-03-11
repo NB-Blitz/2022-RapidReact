@@ -39,7 +39,6 @@ public class Robot extends TimedRobot {
 	private BallLauncher ballLauncher = new BallLauncher();
 	private BallStorage ballStorage = new BallStorage();
 	private Climber climber = new Climber();
-	private Simulation sim = new Simulation();
 
 	@Override
 	public void robotInit() {
@@ -68,22 +67,26 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousInit() {
 		autoManager.reset();
-		sim.reset();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
 		AutoInput input = autoManager.update();
-		autoManager.goalAngle = sim.getGoalAngle();
 		
 		// Ball Storage / Launcher
 		if (input.isShooting) {
 			ballLauncher.run(true);
 
 			boolean isRev = ballLauncher.getRev();
-			ballStorage.runFeed(isRev);
-			ballStorage.runIntake(isRev);
-			ballStorage.runStorage(isRev);
+			if (isRev) {
+				ballStorage.runFeed();
+				ballStorage.runIntake();
+				ballStorage.runStorage();
+			} else {
+				ballStorage.stopFeed();
+				ballStorage.stopIntake();
+				ballStorage.stopStorage();
+			}
 		} else {
 			ballLauncher.run(0);
 			ballStorage.runAutomatic();
@@ -97,9 +100,6 @@ public class Robot extends TimedRobot {
 		backRight.set(xInput + yInput + zInput);
 		frontLeft.set(xInput + yInput - zInput);
 		frontRight.set(-xInput + yInput + zInput);
-
-		// Simulation
-		sim.drive(input.move);
 	}
 
 	/*
@@ -114,7 +114,6 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void teleopInit() {
-		sim.reset();
 	}
 
 	@Override
@@ -123,17 +122,19 @@ public class Robot extends TimedRobot {
 
 		// Manipulator Input
 		double climberInput = manipController.getRightY();
-		boolean revDigitalInput = manipController.getLeftBumper() || manipController.getRightBumper();
-		boolean shootInput = manipController.getYButton() || manipController.getBButton();
-		boolean intakeInput = manipController.getXButton() || manipController.getAButton();
+		boolean shootInput = manipController.getBButton();
+		boolean intakeInput = manipController.getAButton();
+		boolean outakeInput = manipController.getXButton();
+		boolean storageInput = manipController.getYButton();
+		boolean stopAutoInput = manipController.getRightBumper();
 		double povInput = manipController.getPOV();
 		boolean forceIntakeInput = povInput == 0;
 		boolean forceOutakeInput = povInput == 180;
 
 		// Driver Input
-		boolean slowInput = driveController.getLeftBumper() || driveController.getRightBumper();
-		boolean alignBallInput = driveController.getXButton() || driveController.getAButton();
-		boolean alignGoalInput = driveController.getYButton() || driveController.getBButton();
+		boolean reverseCtrlInput = driveController.getLeftBumper();
+		boolean slowCtrlInput = driveController.getRightBumper();
+		boolean alignGoalInput = driveController.getAButton();
 		double xInput = driveController.getLeftX();
 		double yInput = -driveController.getLeftY();
 		double zInput = -driveController.getRightX();
@@ -147,21 +148,18 @@ public class Robot extends TimedRobot {
 			zInput = 0;
 		if (Math.abs(climberInput) < DEADBAND)
 			climberInput = 0;
+		
+		// Reverse
+		if (reverseCtrlInput) {
+			xInput *= -1;
+			yInput *= -1;
+			//zInput *= -1;
+		}
 
 		// Tracking
 		if (alignGoalInput) {
-			driveController.setRumble(RumbleType.kLeftRumble, RUMBLE);
 			Vector3 input = autoManager.rotateToGoal();
 			zInput = input.z;
-		}
-		else if (alignBallInput) {
-			driveController.setRumble(RumbleType.kRightRumble, RUMBLE);
-			Vector3 input = autoManager.rotateToBall();
-			zInput = input.z;
-		}
-		else {
-			driveController.setRumble(RumbleType.kLeftRumble, 0);
-			driveController.setRumble(RumbleType.kRightRumble, 0);
 		}
 
 		// Manip Rumble
@@ -174,10 +172,12 @@ public class Robot extends TimedRobot {
 		}
 
 		// Ball Launcher
-		if (revDigitalInput || shootInput)
+		if (shootInput)
 			ballLauncher.run(true);
-		else
+		else if (stopAutoInput)
 			ballLauncher.run(false);
+		else
+			ballLauncher.run(true);
 
 		// Ball Storage
 		if (forceIntakeInput) {
@@ -194,22 +194,35 @@ public class Robot extends TimedRobot {
 			boolean isRev = ballLauncher.getRev();
 			if (isRev)
 				isFeeding = true;
-			ballStorage.runIntake(isFeeding);
-			ballStorage.runStorage(isFeeding);
-			ballStorage.runFeed(isFeeding);
-		}
-		else if (intakeInput) {
-			ballStorage.runStorage(true);
-			ballStorage.runFeed(false);
-			ballStorage.runIntake(true);
+			if (isFeeding) {
+				ballStorage.runIntake();
+				ballStorage.runStorage();
+				ballStorage.runFeed();
+			} else {
+				ballStorage.stopIntake();
+				ballStorage.stopStorage();
+				ballStorage.stopFeed();
+			}
 		}
 		else {
-			/*
-			ballStorage.runAutomatic();
-			*/
-			ballStorage.runStorage(false);
-			ballStorage.runFeed(false);
-			ballStorage.runIntake(false);
+			// Storage
+			if (storageInput)
+				ballStorage.runStorage();
+			else if (stopAutoInput)
+				ballStorage.stopStorage();
+			else
+				ballStorage.runAutomatic();
+
+			// Intake
+			if (intakeInput)
+				ballStorage.runIntake();
+			else if (outakeInput)
+				ballStorage.runOuttake();
+			else
+				ballStorage.stopIntake();
+			
+			// Feed
+			ballStorage.stopFeed();
 			isFeeding = false;
 		}
 
@@ -217,15 +230,11 @@ public class Robot extends TimedRobot {
 		climber.run(climberInput);
 
 		// Drive Train
-		double speed = slowInput ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;
+		double speed = slowCtrlInput ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;
 		backLeft.set(speed * (-xInput + yInput - zInput));
 		backRight.set(speed * (xInput + yInput + zInput));
 		frontLeft.set(speed * (xInput + yInput - zInput));
 		frontRight.set(speed * (-xInput + yInput + zInput));		
-
-		// Simulation
-		sim.drive(new Vector3(xInput, yInput, zInput));
-		autoManager.goalAngle = sim.getGoalAngle();
 	}
 
 	/*
