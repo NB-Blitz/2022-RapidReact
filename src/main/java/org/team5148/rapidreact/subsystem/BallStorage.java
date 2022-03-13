@@ -55,6 +55,14 @@ public class BallStorage {
     }
 
     /**
+     * Runs storage motor
+     */
+    public void runStorageReverse() {
+        double storageSpeed = -nt.storageSpeed.getDouble(DefaultSpeed.STORAGE) * 0.5;
+        runStorage(storageSpeed);
+    }
+
+    /**
      * Run storage motors at a given speed
      * @param speed - Speed to run storage motors at
      */
@@ -82,7 +90,7 @@ public class BallStorage {
     /**
      * Runs the intake motor in reverse
      */
-    public void runOuttake() {
+    public void runIntakeReverse() {
         double intakeSpeed = -nt.intakeSpeed.getDouble(DefaultSpeed.INTAKE);
         runIntake(intakeSpeed);
     }
@@ -107,6 +115,14 @@ public class BallStorage {
      */
     public void runFeed() {
         double feedSpeed = nt.feedSpeed.getDouble(DefaultSpeed.FEED);
+        runFeed(feedSpeed);
+    }
+
+    /**
+     * Runs the feed motor in reverse
+     */
+    public void runFeedReverse() {
+        double feedSpeed = -nt.feedSpeed.getDouble(DefaultSpeed.FEED) * 0.5;
         runFeed(feedSpeed);
     }
 

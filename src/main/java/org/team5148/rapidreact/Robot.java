@@ -66,7 +66,7 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		autoManager.reset();
+		autoManager.initAuto();
 	}
 
 	@Override
@@ -75,21 +75,25 @@ public class Robot extends TimedRobot {
 		
 		// Ball Storage / Launcher
 		if (input.isShooting) {
-			ballLauncher.run(true);
+			ballLauncher.run();
 
 			boolean isRev = ballLauncher.getRev();
-			if (isRev) {
+			if (isRev)
+				isFeeding = true;
+			if (isFeeding) {
 				ballStorage.runFeed();
 				ballStorage.runIntake();
 				ballStorage.runStorage();
 			} else {
 				ballStorage.stopFeed();
-				ballStorage.stopIntake();
+				ballStorage.runIntake();
 				ballStorage.stopStorage();
 			}
 		} else {
 			ballLauncher.run(0);
+			ballStorage.runIntake();
 			ballStorage.runAutomatic();
+			isFeeding = false;
 		}
 		
 		// Movement
@@ -114,6 +118,7 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void teleopInit() {
+		autoManager.initTeleop();
 	}
 
 	@Override
@@ -158,7 +163,7 @@ public class Robot extends TimedRobot {
 
 		// Tracking
 		if (alignGoalInput) {
-			Vector3 input = autoManager.rotateToGoal();
+			Vector3 input = autoManager.alignToGoal();
 			zInput = input.z;
 		}
 
@@ -173,11 +178,9 @@ public class Robot extends TimedRobot {
 
 		// Ball Launcher
 		if (shootInput)
-			ballLauncher.run(true);
-		else if (stopAutoInput)
-			ballLauncher.run(false);
+			ballLauncher.run();
 		else
-			ballLauncher.run(true);
+			ballLauncher.stop();
 
 		// Ball Storage
 		if (forceIntakeInput) {
@@ -208,6 +211,8 @@ public class Robot extends TimedRobot {
 			// Storage
 			if (storageInput)
 				ballStorage.runStorage();
+			else if (outakeInput)
+				ballStorage.runStorageReverse();
 			else if (stopAutoInput)
 				ballStorage.stopStorage();
 			else
@@ -217,12 +222,15 @@ public class Robot extends TimedRobot {
 			if (intakeInput)
 				ballStorage.runIntake();
 			else if (outakeInput)
-				ballStorage.runOuttake();
+				ballStorage.runIntakeReverse();
 			else
 				ballStorage.stopIntake();
 			
 			// Feed
-			ballStorage.stopFeed();
+			if (outakeInput)
+				ballStorage.runFeedReverse();
+			else
+				ballStorage.stopFeed();
 			isFeeding = false;
 		}
 

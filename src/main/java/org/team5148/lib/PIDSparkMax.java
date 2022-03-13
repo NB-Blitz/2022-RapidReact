@@ -96,10 +96,13 @@ public class PIDSparkMax {
     public void setVelocity(double velocity) {
         velocityEntry.setDouble(getVelocity());
         setVelocityEntry.setDouble(velocity);
-        pidController.setReference(
-            velocity,
-            CANSparkMax.ControlType.kVelocity
-        );
+        if (velocity == 0)
+            motor.stopMotor();
+        else
+            pidController.setReference(
+                velocity,
+                CANSparkMax.ControlType.kVelocity
+            );
     }
 
     /**

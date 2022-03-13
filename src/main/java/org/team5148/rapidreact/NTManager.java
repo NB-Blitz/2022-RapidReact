@@ -17,7 +17,8 @@ public class NTManager {
     public NetworkTableEntry autoAbort = autoTab.add("Is Aborted", false).getEntry();
     public NetworkTableEntry autoGyro = autoTab.add("Gyro Angle", 0).getEntry();
     public NetworkTableEntry autoGoalAngle = autoTab.add("Goal Angle", 0).getEntry();
-    public NetworkTableEntry autoGoalRange = autoTab.add("Goal Range", 0).getEntry();
+    public NetworkTableEntry autoBallAngle = autoTab.add("Ball Angle", 0).getEntry();
+    public NetworkTableEntry autoGoalDist = autoTab.add("Goal Distance", 0).getEntry();
     public NetworkTableEntry autoAccel = autoTab.add("Acceleration", 0).getEntry();
     public NetworkTableEntry autoMode = autoTab.add("Mode", 1).getEntry();
     public NetworkTableEntry autoStep = autoTab.add("Step", 0).getEntry();
@@ -42,7 +43,6 @@ public class NTManager {
     // Climber
     public ShuffleboardTab climberTab = Shuffleboard.getTab("Climber");
     public NetworkTableEntry climberSpeed = climberTab.add("Speed", DefaultSpeed.CLIMBER).getEntry();
-    public NetworkTableEntry climberPos = climberTab.add("Position", 0).getEntry();
 
     /**
      * Gets the current instance of NTManager
