@@ -3,8 +3,10 @@ package org.team5148.rapidreact;
 import org.team5148.rapidreact.config.DefaultSpeed;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 /**
  * Network Tables Singleton
@@ -43,6 +45,11 @@ public class NTManager {
     // Climber
     public ShuffleboardTab climberTab = Shuffleboard.getTab("Climber");
     public NetworkTableEntry climberSpeed = climberTab.add("Speed", DefaultSpeed.CLIMBER).getEntry();
+
+    // Simulation
+    public ShuffleboardTab simTab = Shuffleboard.getTab("Simulation");
+    public Field2d simField = new Field2d();
+    public ComplexWidget simFieldEntry = simTab.add("Field", simField);
 
     /**
      * Gets the current instance of NTManager
