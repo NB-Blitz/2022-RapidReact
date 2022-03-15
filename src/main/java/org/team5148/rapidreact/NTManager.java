@@ -20,7 +20,6 @@ public class NTManager {
     public NetworkTableEntry autoGyro = autoTab.add("Gyro Angle", 0).getEntry();
     public NetworkTableEntry autoGoalAngle = autoTab.add("Goal Angle", 0).getEntry();
     public NetworkTableEntry autoBallAngle = autoTab.add("Ball Angle", 0).getEntry();
-    public NetworkTableEntry autoGoalDist = autoTab.add("Goal Distance", 0).getEntry();
     public NetworkTableEntry autoAccel = autoTab.add("Acceleration", 0).getEntry();
     public NetworkTableEntry autoMode = autoTab.add("Mode", 1).getEntry();
     public NetworkTableEntry autoStep = autoTab.add("Step", 0).getEntry();

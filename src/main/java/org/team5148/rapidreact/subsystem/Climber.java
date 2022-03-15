@@ -8,7 +8,8 @@ import org.team5148.rapidreact.config.DefaultSpeed;
 import org.team5148.rapidreact.config.MotorIDs;
 
 public class Climber {
-    private TalonSRX motor = new TalonSRX(MotorIDs.CLIMBER);
+    private TalonSRX leftMotor = new TalonSRX(MotorIDs.LEFT_CLIMBER);
+    private TalonSRX rightMotor = new TalonSRX(MotorIDs.RIGHT_CLIMBER);
     private NTManager nt = NTManager.getInstance();
 
     /**
@@ -17,6 +18,7 @@ public class Climber {
      */
     public void run(double speed) {
         double input = nt.climberSpeed.getDouble(DefaultSpeed.CLIMBER) * speed;
-        motor.set(TalonSRXControlMode.PercentOutput, input);
+        leftMotor.set(TalonSRXControlMode.PercentOutput, input);
+        rightMotor.set(TalonSRXControlMode.PercentOutput, input);
     }
 }

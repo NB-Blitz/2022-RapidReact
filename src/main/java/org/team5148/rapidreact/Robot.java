@@ -40,8 +40,6 @@ public class Robot extends TimedRobot {
 	private BallStorage ballStorage = new BallStorage();
 	private Climber climber = new Climber();
 
-	private Simulation sim = new Simulation();
-
 	@Override
 	public void robotInit() {
 		frontLeft.setInverted(true);
@@ -55,16 +53,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void robotPeriodic() {
-	}
-
-	@Override
-	public void simulationInit() {
-		sim.reset();
-	}
-
-	@Override
-	public void simulationPeriodic() {
-		autoManager.goalAngle = sim.getGoalAngle();
+		
 	}
 
 	/*
@@ -116,8 +105,6 @@ public class Robot extends TimedRobot {
 		backRight.set(xInput + yInput + zInput);
 		frontLeft.set(xInput + yInput - zInput);
 		frontRight.set(-xInput + yInput + zInput);
-
-		sim.drive(input.move);
 	}
 
 	/*
@@ -154,6 +141,7 @@ public class Robot extends TimedRobot {
 		boolean reverseCtrlInput = driveController.getLeftBumper();
 		boolean slowCtrlInput = driveController.getRightBumper();
 		boolean alignGoalInput = driveController.getAButton();
+		boolean alignBallInput = driveController.getYButton();
 		double xInput = driveController.getLeftX();
 		double yInput = -driveController.getLeftY();
 		double zInput = -driveController.getRightX();
@@ -178,6 +166,10 @@ public class Robot extends TimedRobot {
 		// Tracking
 		if (alignGoalInput) {
 			Vector3 input = autoManager.alignToGoal();
+			zInput = input.z;
+		}
+		if (alignBallInput) {
+			Vector3 input = autoManager.alignToBall();
 			zInput = input.z;
 		}
 

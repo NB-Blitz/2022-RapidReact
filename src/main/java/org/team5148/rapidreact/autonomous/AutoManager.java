@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.I2C.Port;
 
 import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -110,7 +109,7 @@ public class AutoManager {
      */
     public void initTeleop() {
         goalCamera.setDriverMode(false);
-		ballCamera.setDriverMode(true);
+		ballCamera.setDriverMode(false);
     }
 
     /**
@@ -141,16 +140,7 @@ public class AutoManager {
             PhotonTrackedTarget target = result.getBestTarget();
             goalAngle = gyroAngle + target.getYaw();
 
-            double distance = PhotonUtils.calculateDistanceToTargetMeters(
-                CAMERA_HEIGHT_METERS,
-                TARGET_HEIGHT_METERS,
-                CAMERA_PITCH_RADIANS,
-                Units.degreesToRadians(target.getPitch())
-            );
-            double power = distance - HUB_TARGET_DISTANCE;
-
             nt.autoGoalAngle.setDouble(goalAngle);
-            nt.autoGoalDist.setDouble(distance);
         } else if (goalAngle == 0) {
             return new Vector3();
         }
@@ -159,6 +149,14 @@ public class AutoManager {
             0,
             rotateTo(goalAngle).z
         );
+    }
+
+    /**
+     * Rotates towards a ball
+     * @return Vector3 of controls
+     */
+    public Vector3 alignToBall() {
+        return alignToBall(gyroAngle);
     }
 
     /**
