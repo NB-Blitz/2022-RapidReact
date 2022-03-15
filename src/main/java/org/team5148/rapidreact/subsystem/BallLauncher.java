@@ -17,13 +17,17 @@ public class BallLauncher {
 
     /**
      * Runs the launcher at the default speed using PID
-     * @param isRunning - Whether or not the launcher is running
      */
-    public void run(boolean isRunning) {
+    public void run() {
         double velocity = nt.launcherSetVel.getDouble(DefaultSpeed.LAUNCHER_VELOCITY);
-        double speed = isRunning ? velocity : 0;
+        run(velocity);
+    }
 
-        run(speed);
+    /**
+     * Stops the launcher motors
+     */
+    public void stop() {
+        run(0);
     }
 
     /**

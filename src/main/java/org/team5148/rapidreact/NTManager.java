@@ -2,9 +2,7 @@ package org.team5148.rapidreact;
 
 import org.team5148.rapidreact.config.DefaultSpeed;
 
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -20,29 +18,14 @@ public class NTManager {
     public ShuffleboardTab autoTab = Shuffleboard.getTab("Autonomous");
     public NetworkTableEntry autoAbort = autoTab.add("Is Aborted", false).getEntry();
     public NetworkTableEntry autoGyro = autoTab.add("Gyro Angle", 0).getEntry();
-    public NetworkTableEntry autoBallAngle = autoTab.add("Ball Angle", 0).getEntry();
     public NetworkTableEntry autoGoalAngle = autoTab.add("Goal Angle", 0).getEntry();
+    public NetworkTableEntry autoBallAngle = autoTab.add("Ball Angle", 0).getEntry();
     public NetworkTableEntry autoAccel = autoTab.add("Acceleration", 0).getEntry();
     public NetworkTableEntry autoMode = autoTab.add("Mode", 1).getEntry();
     public NetworkTableEntry autoStep = autoTab.add("Step", 0).getEntry();
     public NetworkTableEntry autoXInput = autoTab.add("X Input", 0).getEntry();
     public NetworkTableEntry autoYInput = autoTab.add("Y Input", 0).getEntry();
     public NetworkTableEntry autoZInput = autoTab.add("Z Input", 0).getEntry();
-
-    // Ball
-    public NetworkTableInstance ntinst = NetworkTableInstance.getDefault();
-    public NetworkTable ballTable = ntinst.getTable("Ball Cam");
-    public NetworkTableEntry ballVisible = ballTable.getEntry("Is Visible");
-    public NetworkTableEntry ballX = ballTable.getEntry("X Position");
-    public NetworkTableEntry ballY = ballTable.getEntry("Y Position");
-    public NetworkTableEntry ballArea = ballTable.getEntry("Area");
-
-    // Goal
-    public NetworkTable goalTable = ntinst.getTable("Goal Cam");
-    public NetworkTableEntry goalVisible = goalTable.getEntry("Is Visible");
-    public NetworkTableEntry goalX = goalTable.getEntry("X Position");
-    public NetworkTableEntry goalY = goalTable.getEntry("Y Position");
-    public NetworkTableEntry goalArea = goalTable.getEntry("Area");
 
     // Launcher
     public ShuffleboardTab launcherTab = Shuffleboard.getTab("Launcher");
@@ -61,7 +44,6 @@ public class NTManager {
     // Climber
     public ShuffleboardTab climberTab = Shuffleboard.getTab("Climber");
     public NetworkTableEntry climberSpeed = climberTab.add("Speed", DefaultSpeed.CLIMBER).getEntry();
-    public NetworkTableEntry climberPos = climberTab.add("Position", 0).getEntry();
 
     // Simulation
     public ShuffleboardTab simTab = Shuffleboard.getTab("Simulation");
