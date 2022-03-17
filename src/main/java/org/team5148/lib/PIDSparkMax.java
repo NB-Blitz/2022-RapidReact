@@ -55,7 +55,6 @@ public class PIDSparkMax {
         motor = new CANSparkMax(id, MotorType.kBrushless);
         encoder = motor.getEncoder();
         pidController = motor.getPIDController();
-        motor.setOpenLoopRampRate(0.1);
         setConfig(pidConfig);
     }
 

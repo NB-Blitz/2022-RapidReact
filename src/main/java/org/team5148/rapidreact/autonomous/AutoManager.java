@@ -101,7 +101,7 @@ public class AutoManager {
         reset();
         goalCamera.setDriverMode(false);
 		ballCamera.setDriverMode(false);
-        ballCamera.setPipelineIndex(DriverStation.getAlliance() == Alliance.Blue ? 0 : 1);
+        ballCamera.setPipelineIndex(DriverStation.getAlliance() == Alliance.Blue ? 1 : 0);
     }
 
     /**
@@ -110,6 +110,7 @@ public class AutoManager {
     public void initTeleop() {
         goalCamera.setDriverMode(false);
 		ballCamera.setDriverMode(false);
+        ballCamera.setPipelineIndex(DriverStation.getAlliance() == Alliance.Blue ? 1 : 0);
     }
 
     /**
@@ -119,7 +120,7 @@ public class AutoManager {
      */
     public Vector3 rotateTo(double angle) {
         double deltaAngle = gyroAngle - angle;
-        double power = deltaAngle / 140;
+        double power = deltaAngle / 90;
 
         if (power > 1)
             power = 1;
@@ -139,16 +140,12 @@ public class AutoManager {
         if (result.hasTargets()) {
             PhotonTrackedTarget target = result.getBestTarget();
             goalAngle = gyroAngle + target.getYaw();
-
             nt.autoGoalAngle.setDouble(goalAngle);
-        } else if (goalAngle == 0) {
+
+            return new Vector3(0, 0, rotateTo(goalAngle).z);
+        } else {
             return new Vector3();
         }
-        return new Vector3(
-            0,
-            0,
-            rotateTo(goalAngle).z
-        );
     }
 
     /**

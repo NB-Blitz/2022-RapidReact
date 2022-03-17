@@ -11,6 +11,7 @@ import org.team5148.lib.Vector3;
 import org.team5148.rapidreact.autonomous.AutoInput;
 import org.team5148.rapidreact.autonomous.AutoManager;
 import org.team5148.rapidreact.config.DefaultSpeed;
+import org.team5148.rapidreact.config.LauncherTarget;
 import org.team5148.rapidreact.config.MotorIDs;
 import org.team5148.rapidreact.subsystem.BallLauncher;
 import org.team5148.rapidreact.subsystem.BallStorage;
@@ -18,7 +19,7 @@ import org.team5148.rapidreact.subsystem.Climber;
 
 public class Robot extends TimedRobot {
 
-	private final double DEADBAND = 0.15;
+	private final double DEADBAND = 0.2;
 	private final double RUMBLE = 0.2;
 	private final double RAMP = 0.3;
 
@@ -76,14 +77,14 @@ public class Robot extends TimedRobot {
 		
 		// Ball Storage / Launcher
 		if (input.isShooting) {
-			ballLauncher.run();
+			ballLauncher.run(LauncherTarget.Tarmac);
 
 			boolean isRev = ballLauncher.getRev();
 			if (isRev)
 				isFeeding = true;
 			if (isFeeding) {
 				ballStorage.runFeed();
-				ballStorage.runIntake();
+				ballStorage.stopIntake();
 				ballStorage.runStorage();
 			} else {
 				ballStorage.stopFeed();
@@ -128,11 +129,13 @@ public class Robot extends TimedRobot {
 
 		// Manipulator Input
 		double climberInput = manipController.getRightY();
-		boolean shootInput = manipController.getBButton();
-		boolean intakeInput = manipController.getAButton();
-		boolean outakeInput = manipController.getXButton();
-		boolean storageInput = manipController.getYButton();
-		boolean stopAutoInput = manipController.getRightBumper();
+		boolean forceClimbInput = manipController.getRightStickButton();
+		boolean outakeInput = manipController.getLeftBumper();
+		boolean intakeInput =  manipController.getRightBumper();
+		boolean shootLowGoalInput = manipController.getYButton();
+		boolean shootTarmacInput = manipController.getXButton();
+		boolean shootFieldWallInput = manipController.getBButton();
+		boolean shootLaunchpadInput = manipController.getAButton();
 		double povInput = manipController.getPOV();
 		boolean forceIntakeInput = povInput == 0;
 		boolean forceOutakeInput = povInput == 180;
@@ -160,7 +163,6 @@ public class Robot extends TimedRobot {
 		if (reverseCtrlInput) {
 			xInput *= -1;
 			yInput *= -1;
-			//zInput *= -1;
 		}
 
 		// Tracking
@@ -183,8 +185,15 @@ public class Robot extends TimedRobot {
 		}
 
 		// Ball Launcher
-		if (shootInput)
-			ballLauncher.run();
+		boolean isShooting = shootFieldWallInput || shootLaunchpadInput || shootLowGoalInput || shootTarmacInput;
+		if (shootLowGoalInput)
+			ballLauncher.run(LauncherTarget.LowGoal);
+		else if (shootTarmacInput)
+			ballLauncher.run(LauncherTarget.Tarmac);
+		else if (shootLaunchpadInput)
+			ballLauncher.run(LauncherTarget.Launchpad);
+		else if (shootFieldWallInput)
+			ballLauncher.run(LauncherTarget.FieldWall);
 		else
 			ballLauncher.stop();
 
@@ -199,7 +208,7 @@ public class Robot extends TimedRobot {
 			ballStorage.runStorage(-1);
 			ballStorage.runFeed(-1);
 		}
-		else if (shootInput) {
+		else if (isShooting) {
 			boolean isRev = ballLauncher.getRev();
 			if (isRev)
 				isFeeding = true;
@@ -215,12 +224,8 @@ public class Robot extends TimedRobot {
 		}
 		else {
 			// Storage
-			if (storageInput)
-				ballStorage.runStorage();
-			else if (outakeInput)
+			if (outakeInput)
 				ballStorage.runStorageReverse();
-			else if (stopAutoInput)
-				ballStorage.stopStorage();
 			else
 				ballStorage.runAutomatic();
 
@@ -241,7 +246,10 @@ public class Robot extends TimedRobot {
 		}
 
 		// Climber
-		climber.run(climberInput);
+		if (forceClimbInput)
+			climber.forceRun(climberInput);
+		else
+			climber.run(climberInput);
 
 		// Drive Train
 		double speed = slowCtrlInput ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;

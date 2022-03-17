@@ -25,6 +25,12 @@ public class BallStorage {
     private boolean beginValue = false;
     private boolean endValue = false;
 
+    public BallStorage() {
+        leftStorageMotor.configOpenloopRamp(0.3);
+        rightStorageMotor.configOpenloopRamp(0.3);
+        feedMotor.configOpenloopRamp(0.3);
+    }
+
     /**
      * Runs storage motors based on the line break sensors
      */

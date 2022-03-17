@@ -29,7 +29,7 @@ public class NTManager {
 
     // Launcher
     public ShuffleboardTab launcherTab = Shuffleboard.getTab("Launcher");
-    public NetworkTableEntry launcherSetVel = launcherTab.add("Set Velocity", DefaultSpeed.LAUNCHER_VELOCITY).getEntry();
+    public NetworkTableEntry launcherSetVel = launcherTab.add("Set Velocity", 0).getEntry();
     public NetworkTableEntry launcherRoll = launcherTab.add("Roll Velocity", DefaultSpeed.ROLL_VELOCITY).getEntry();
     public NetworkTableEntry launcherRev = launcherTab.add("Is Rev", false).getEntry();
 
@@ -44,6 +44,8 @@ public class NTManager {
     // Climber
     public ShuffleboardTab climberTab = Shuffleboard.getTab("Climber");
     public NetworkTableEntry climberSpeed = climberTab.add("Speed", DefaultSpeed.CLIMBER).getEntry();
+    public NetworkTableEntry climberLeftPos = climberTab.add("Left Position", 0).getEntry();
+    public NetworkTableEntry climberRightPos = climberTab.add("Right Position", 0).getEntry();
 
     // Simulation
     public ShuffleboardTab simTab = Shuffleboard.getTab("Simulation");
