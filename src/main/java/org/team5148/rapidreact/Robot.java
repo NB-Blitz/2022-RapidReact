@@ -121,6 +121,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopInit() {
 		autoManager.initTeleop();
+		climber.reset();
 	}
 
 	@Override

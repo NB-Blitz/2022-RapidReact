@@ -9,14 +9,19 @@ import org.team5148.rapidreact.config.DefaultSpeed;
 import org.team5148.rapidreact.config.MotorIDs;
 
 public class Climber {
-    public static final double MAX_POSITION = 1000000;
-    public static final double MIN_POSITION = -1000000;
+    public static final double MAX_POSITION = -5;
+    public static final double MIN_POSITION = -18;
 
     private CANSparkMax leftMotor = new CANSparkMax(MotorIDs.LEFT_CLIMBER, MotorType.kBrushless);
     private CANSparkMax rightMotor = new CANSparkMax(MotorIDs.RIGHT_CLIMBER, MotorType.kBrushless);
     private RelativeEncoder leftEncoder = leftMotor.getEncoder();
     private RelativeEncoder rightEncoder = rightMotor.getEncoder();
     private NTManager nt = NTManager.getInstance();
+
+    public void reset() {
+        leftEncoder.setPosition(0);
+        rightEncoder.setPosition(0);
+    }
 
     /**
      * Runs the climber hook
@@ -29,9 +34,9 @@ public class Climber {
         nt.climberLeftPos.setDouble(leftPosition);
         nt.climberRightPos.setDouble(rightPosition);
 
-        if (speed > 0 && leftPosition > MAX_POSITION)
+        if (speed > 0 && leftPosition >= MAX_POSITION)
             forceRun(0);
-        else if (speed < 0 && leftPosition < MIN_POSITION)
+        else if (speed < 0 && leftPosition <= MIN_POSITION)
             forceRun(0);
         else
             forceRun(speed);
