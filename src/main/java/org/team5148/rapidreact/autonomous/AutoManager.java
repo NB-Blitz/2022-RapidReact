@@ -16,6 +16,7 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class AutoManager {
+    public static final int DEFAULT_MODE = 2;
     public static final double ABORT_ACCEL = 5;
     public static final double HUB_TARGET_DISTANCE = 2;
     public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(18);
@@ -59,7 +60,7 @@ public class AutoManager {
             isAborted = true;
 
         // Modes
-        double mode = nt.autoMode.getDouble(0);
+        double mode = nt.autoMode.getDouble(DEFAULT_MODE);
         AutoInput input = new AutoInput();
         if (isAborted)
             input = new AutoInput();
@@ -109,8 +110,7 @@ public class AutoManager {
      */
     public void initTeleop() {
         goalCamera.setDriverMode(false);
-		ballCamera.setDriverMode(false);
-        ballCamera.setPipelineIndex(DriverStation.getAlliance() == Alliance.Blue ? 1 : 0);
+		ballCamera.setDriverMode(true);
     }
 
     /**

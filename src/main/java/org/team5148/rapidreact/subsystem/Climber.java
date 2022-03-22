@@ -9,8 +9,8 @@ import org.team5148.rapidreact.config.DefaultSpeed;
 import org.team5148.rapidreact.config.MotorIDs;
 
 public class Climber {
-    public static final double MAX_POSITION = -5;
-    public static final double MIN_POSITION = -18;
+    public static final double MAX_POSITION = 1000;
+    public static final double MIN_POSITION = -1000;
 
     private CANSparkMax leftMotor = new CANSparkMax(MotorIDs.LEFT_CLIMBER, MotorType.kBrushless);
     private CANSparkMax rightMotor = new CANSparkMax(MotorIDs.RIGHT_CLIMBER, MotorType.kBrushless);

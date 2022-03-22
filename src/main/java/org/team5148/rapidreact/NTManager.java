@@ -1,5 +1,6 @@
 package org.team5148.rapidreact;
 
+import org.team5148.rapidreact.autonomous.AutoManager;
 import org.team5148.rapidreact.config.DefaultSpeed;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -21,7 +22,7 @@ public class NTManager {
     public NetworkTableEntry autoGoalAngle = autoTab.add("Goal Angle", 0).getEntry();
     public NetworkTableEntry autoBallAngle = autoTab.add("Ball Angle", 0).getEntry();
     public NetworkTableEntry autoAccel = autoTab.add("Acceleration", 0).getEntry();
-    public NetworkTableEntry autoMode = autoTab.add("Mode", 1).getEntry();
+    public NetworkTableEntry autoMode = autoTab.add("Mode", AutoManager.DEFAULT_MODE).getEntry();
     public NetworkTableEntry autoStep = autoTab.add("Step", 0).getEntry();
     public NetworkTableEntry autoXInput = autoTab.add("X Input", 0).getEntry();
     public NetworkTableEntry autoYInput = autoTab.add("Y Input", 0).getEntry();
