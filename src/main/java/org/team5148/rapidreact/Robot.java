@@ -41,8 +41,7 @@ public class Robot extends TimedRobot {
 	private BallStorage ballStorage = new BallStorage();
 	private Climber climber = new Climber();
 
-	@Override
-	public void robotInit() {
+	public void initDrivetrain() {
 		frontLeft.setInverted(true);
 		backLeft.setInverted(true);
 
@@ -50,6 +49,11 @@ public class Robot extends TimedRobot {
 		backRight.setOpenLoopRampRate(RAMP);
 		frontLeft.setOpenLoopRampRate(RAMP);
 		frontRight.setOpenLoopRampRate(RAMP);
+	}
+
+	@Override
+	public void robotInit() {
+		initDrivetrain();
 	}
 
 	@Override
@@ -68,6 +72,7 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void autonomousInit() {
+		initDrivetrain();
 		autoManager.initAuto();
 	}
 
@@ -120,6 +125,7 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void teleopInit() {
+		initDrivetrain();
 		autoManager.initTeleop();
 		climber.reset();
 	}
