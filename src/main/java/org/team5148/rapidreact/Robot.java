@@ -135,8 +135,9 @@ public class Robot extends TimedRobot {
 		autoManager.update();
 
 		// Manipulator Input
-		double climberInput = manipController.getRightY();
-		boolean forceClimbInput = manipController.getRightStickButton();
+		double climberLeftInput = manipController.getLeftY();
+		double climberRightInput = manipController.getRightY();
+		boolean forceClimbInput = manipController.getRightStickButton() || manipController.getLeftStickButton();
 		boolean outakeInput = manipController.getLeftBumper();
 		boolean intakeInput =  manipController.getRightBumper();
 		boolean shootLowGoalInput = manipController.getYButton();
@@ -154,7 +155,7 @@ public class Robot extends TimedRobot {
 		boolean alignBallInput = driveController.getYButton();
 		double xInput = driveController.getLeftX();
 		double yInput = -driveController.getLeftY();
-		double zInput = -driveController.getRightX();
+		double zInput = DefaultSpeed.ROTATE * -driveController.getRightX();
 
 		// Deadband
 		if (Math.abs(xInput) < DEADBAND)
@@ -163,8 +164,10 @@ public class Robot extends TimedRobot {
 			yInput = 0;
 		if (Math.abs(zInput) < DEADBAND)
 			zInput = 0;
-		if (Math.abs(climberInput) < DEADBAND)
-			climberInput = 0;
+		if (Math.abs(climberLeftInput) < DEADBAND)
+			climberLeftInput = 0;
+		if (Math.abs(climberRightInput) < DEADBAND)
+			climberRightInput = 0;
 		
 		// Reverse
 		if (reverseCtrlInput) {
@@ -253,10 +256,13 @@ public class Robot extends TimedRobot {
 		}
 
 		// Climber
-		if (forceClimbInput)
-			climber.forceRun(climberInput);
-		else
-			climber.run(climberInput);
+		if (forceClimbInput) {
+			climber.forceRunLeft(climberLeftInput);
+			climber.forceRunRight(climberRightInput);
+		} else {
+			climber.runLeft(climberLeftInput);
+			climber.runRight(climberRightInput);
+		}
 
 		// Drive Train
 		double speed = slowCtrlInput ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;

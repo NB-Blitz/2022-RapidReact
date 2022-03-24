@@ -24,31 +24,54 @@ public class Climber {
     }
 
     /**
-     * Runs the climber hook
-     * @param speed - Speed of the hook [-1 - 1]
+     * Runs the left climber hook
+     * @param speed - Speed of the left hook [-1 - 1]
      */
-    public void run(double speed) {
+    public void runLeft(double speed) {
         double leftPosition = leftEncoder.getPosition();
-        double rightPosition = rightEncoder.getPosition();
 
         nt.climberLeftPos.setDouble(leftPosition);
-        nt.climberRightPos.setDouble(rightPosition);
 
         if (speed > 0 && leftPosition >= MAX_POSITION)
-            forceRun(0);
+            forceRunLeft(0);
         else if (speed < 0 && leftPosition <= MIN_POSITION)
-            forceRun(0);
+            forceRunLeft(0);
         else
-            forceRun(speed);
+            forceRunLeft(speed);
     }
 
     /**
-     * Runs the climber hook, ignoring any encoder input
-     * @param speed - Speed of the hook [-1 - 1]
+     * Runs the left climber hook, ignoring any encoder input
+     * @param speed - Speed of the left hook [-1 - 1]
      */
-    public void forceRun(double speed) {
+    public void forceRunLeft(double speed) {
         double input = nt.climberSpeed.getDouble(DefaultSpeed.CLIMBER) * speed;
         leftMotor.set(input);
+    }
+
+    /**
+     * Runs the right climber hook
+     * @param speed - Speed of the right hook [-1 - 1]
+     */
+    public void runRight(double speed) {
+        double rightPosition = rightEncoder.getPosition();
+
+        nt.climberRightPos.setDouble(rightPosition);
+
+        if (speed > 0 && rightPosition >= MAX_POSITION)
+            forceRunRight(0);
+        else if (speed < 0 && rightPosition <= MIN_POSITION)
+            forceRunRight(0);
+        else
+            forceRunRight(speed);
+    }
+
+    /**
+     * Runs the right climber hook, ignoring any encoder input
+     * @param speed - Speed of the right hook [-1 - 1]
+     */
+    public void forceRunRight(double speed) {
+        double input = nt.climberSpeed.getDouble(DefaultSpeed.CLIMBER) * speed;
         rightMotor.set(input);
     }
 }

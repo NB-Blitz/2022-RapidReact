@@ -18,7 +18,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 public class AutoManager {
     public static final int DEFAULT_MODE = 2;
     public static final double ABORT_ACCEL = 5;
-    public static final double HUB_TARGET_DISTANCE = 2;
+    public static final double MAX_ROTATE = 0.7;
     public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(18);
     public static final double TARGET_HEIGHT_METERS = Units.inchesToMeters(104);
     public static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(45);
@@ -68,6 +68,8 @@ public class AutoManager {
             input = mode1();
         else if (mode == 2)
             input = mode2();
+        else if (mode == 3)
+            input = mode3();
 
         // Network Tables
         nt.autoStep.setNumber(step);
@@ -122,10 +124,10 @@ public class AutoManager {
         double deltaAngle = gyroAngle - angle;
         double power = deltaAngle / 90;
 
-        if (power > 1)
-            power = 1;
-        if (power < -1)
-            power = -1;
+        if (power > MAX_ROTATE)
+            power = MAX_ROTATE;
+        if (power < -MAX_ROTATE)
+            power = -MAX_ROTATE;
 
         Vector3 output = new Vector3(0, 0, power);
         return output;
@@ -208,7 +210,49 @@ public class AutoManager {
     * |_|  \_\___/ \__,_|\__|_|_| |_|\___||___/
     *                                                                                   
     */
+
     private AutoInput mode1() {
+        AutoInput input = new AutoInput();
+        switch (step) {
+            case 0:
+                input.move.y = 0.3;
+                if (timer.get() > 2)
+                    nextStep();
+                break;
+        }
+        return input;
+    }
+
+    private AutoInput mode2() {
+        AutoInput input = new AutoInput();
+        switch (step) {
+            case 0:
+                input.move = rotateTo(360);
+                if (timer.get() > 2)
+                    nextStep();
+                break;
+            case 1:
+                input.move = driveTo(0, 0.3);
+                if (timer.get() > 2)
+                    nextStep();
+                break;
+            case 2:
+                input.move = driveTo(0, -0.3);
+                input.move.z = rotateTo(180).z;
+                if (timer.get() > 1.5)
+                    nextStep();
+                break;
+            case 3:
+                input.move = alignToGoal();
+                input.isShooting = true;
+                if (timer.get() > 4)
+                    nextStep();
+                break;
+        }
+        return input;
+    }
+
+    private AutoInput mode3() {
         AutoInput input = new AutoInput();
         switch (step) {
             case 0:
@@ -263,30 +307,6 @@ public class AutoManager {
                 input.move.y = 0.3;
                 input.move.z = alignToBall(230).z;
                 if (timer.get() > 1)
-                    nextStep();
-                break;
-        }
-        return input;
-    }
-
-    private AutoInput mode2() {
-        AutoInput input = new AutoInput();
-        switch (step) {
-            case 0:
-                input.move.y = 0.3;
-                if (timer.get() > 3)
-                    nextStep();
-                break;
-            case 1:
-                input.move = driveTo(0, -0.3);
-                input.move.z = rotateTo(180).z;
-                if (timer.get() > 1.5)
-                    nextStep();
-                break;
-            case 2:
-                input.move = alignToGoal();
-                input.isShooting = true;
-                if (timer.get() > 4)
                     nextStep();
                 break;
         }
