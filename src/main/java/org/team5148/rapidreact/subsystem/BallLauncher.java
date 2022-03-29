@@ -44,7 +44,7 @@ public class BallLauncher {
      * Stops the launcher motors
      */
     public void stop() {
-        run(0);
+        run(0, 0);
     }
 
     /**

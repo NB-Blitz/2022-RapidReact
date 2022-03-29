@@ -42,9 +42,6 @@ public class Robot extends TimedRobot {
 	private Climber climber = new Climber();
 
 	public void initDrivetrain() {
-		frontLeft.setInverted(true);
-		backLeft.setInverted(true);
-
 		backLeft.setOpenLoopRampRate(RAMP);
 		backRight.setOpenLoopRampRate(RAMP);
 		frontLeft.setOpenLoopRampRate(RAMP);
@@ -107,9 +104,9 @@ public class Robot extends TimedRobot {
 		double xInput = input.move.x;
 		double yInput = input.move.y;
 		double zInput = input.move.z;
-		backLeft.set(-xInput + yInput - zInput);
+		backLeft.set(-(-xInput + yInput - zInput));
 		backRight.set(xInput + yInput + zInput);
-		frontLeft.set(xInput + yInput - zInput);
+		frontLeft.set(-(xInput + yInput - zInput));
 		frontRight.set(-xInput + yInput + zInput);
 	}
 
@@ -144,6 +141,7 @@ public class Robot extends TimedRobot {
 		boolean shootTarmacInput = manipController.getXButton();
 		boolean shootFieldWallInput = manipController.getBButton();
 		boolean shootLaunchpadInput = manipController.getAButton();
+		boolean primeInput = manipController.getLeftTriggerAxis() > DEADBAND || manipController.getRightTriggerAxis() > DEADBAND;
 		double povInput = manipController.getPOV();
 		boolean forceIntakeInput = povInput == 0;
 		boolean forceOutakeInput = povInput == 180;
@@ -210,12 +208,12 @@ public class Robot extends TimedRobot {
 		// Ball Storage
 		if (forceIntakeInput) {
 			ballStorage.runIntake(1);
-			ballStorage.runStorage(1);
+			ballStorage.runStorage(1, 1);
 			ballStorage.runFeed(1);
 		}
 		else if (forceOutakeInput) {
 			ballStorage.runIntake(-1);
-			ballStorage.runStorage(-1);
+			ballStorage.runStorage(-1, -1);
 			ballStorage.runFeed(-1);
 		}
 		else if (isShooting) {
@@ -233,6 +231,12 @@ public class Robot extends TimedRobot {
 			}
 		}
 		else {
+			// Shooter
+			if (primeInput)
+				ballLauncher.run(LauncherTarget.Tarmac);
+			else
+				ballLauncher.stop();
+
 			// Storage
 			if (outakeInput)
 				ballStorage.runStorageReverse();
@@ -266,9 +270,9 @@ public class Robot extends TimedRobot {
 
 		// Drive Train
 		double speed = slowCtrlInput ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;
-		backLeft.set(speed * (-xInput + yInput - zInput));
+		backLeft.set(-speed * (-xInput + yInput - zInput));
 		backRight.set(speed * (xInput + yInput + zInput));
-		frontLeft.set(speed * (xInput + yInput - zInput));
+		frontLeft.set(-speed * (xInput + yInput - zInput));
 		frontRight.set(speed * (-xInput + yInput + zInput));		
 	}
 
@@ -283,11 +287,10 @@ public class Robot extends TimedRobot {
 	*/
 	@Override
 	public void testInit() {
-
 	}
 
 	@Override
 	public void testPeriodic() {
-
+		autoManager.update();
 	}
 }
