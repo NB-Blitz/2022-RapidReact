@@ -1,18 +1,19 @@
 package org.team5148.rapidreact;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
-import org.team5148.lib.Vector3;
-import org.team5148.rapidreact.autonomous.AutoInput;
-import org.team5148.rapidreact.autonomous.AutoManager;
+import org.team5148.lib.auto.MecanumDriveOdom;
+import org.team5148.lib.drivers.MecanumDrive;
+import org.team5148.lib.drivers.NavX;
+import org.team5148.lib.util.Vector3;
 import org.team5148.rapidreact.config.DefaultSpeed;
 import org.team5148.rapidreact.config.LauncherTarget;
-import org.team5148.rapidreact.config.MotorIDs;
 import org.team5148.rapidreact.subsystem.BallLauncher;
 import org.team5148.rapidreact.subsystem.BallStorage;
 import org.team5148.rapidreact.subsystem.Climber;
@@ -29,34 +30,30 @@ public class Robot extends TimedRobot {
 	private XboxController driveController = new XboxController(0);
 	private XboxController manipController = new XboxController(1);
 
+	// Kinematics
+	Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
+	Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
+	Translation2d m_backLeftLocation = new Translation2d(-0.381, 0.381);
+	Translation2d m_backRightLocation = new Translation2d(-0.381, -0.381);
+	MecanumDriveKinematics m_kinematics = new MecanumDriveKinematics(
+		m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation
+	);
+
 	// Motors
-	private CANSparkMax backLeft = new CANSparkMax(MotorIDs.BACK_LEFT, MotorType.kBrushless);
-	private CANSparkMax backRight = new CANSparkMax(MotorIDs.BACK_RIGHT, MotorType.kBrushless);
-	private CANSparkMax frontLeft = new CANSparkMax(MotorIDs.FRONT_LEFT, MotorType.kBrushless);
-	private CANSparkMax frontRight = new CANSparkMax(MotorIDs.FRONT_RIGHT, MotorType.kBrushless);
+	private NavX navX = new NavX();
+	private MecanumDrive mecanumDrive = new MecanumDrive(RAMP);
+	private MecanumDriveOdom mecanumDriveOdom = new MecanumDriveOdom(mecanumDrive, m_kinematics);
 
 	// Subsystems
-	private AutoManager autoManager = new AutoManager();
 	private BallLauncher ballLauncher = new BallLauncher();
 	private BallStorage ballStorage = new BallStorage();
 	private Climber climber = new Climber();
 
-	public void initDrivetrain() {
-		backLeft.setOpenLoopRampRate(RAMP);
-		backRight.setOpenLoopRampRate(RAMP);
-		frontLeft.setOpenLoopRampRate(RAMP);
-		frontRight.setOpenLoopRampRate(RAMP);
-	}
+	@Override
+	public void robotInit() {}
 
 	@Override
-	public void robotInit() {
-		initDrivetrain();
-	}
-
-	@Override
-	public void robotPeriodic() {
-		
-	}
+	public void robotPeriodic() {}
 
 	/*
                 _                                              
@@ -67,48 +64,12 @@ public class Robot extends TimedRobot {
  /_/    \_\__,_|\__\___/|_| |_|\___/|_| |_| |_|\___/ \__,_|___/
                                                                                                                     
 	 */
-	@Override
-	public void autonomousInit() {
-		initDrivetrain();
-		autoManager.initAuto();
-	}
 
 	@Override
-	public void autonomousPeriodic() {
-		AutoInput input = autoManager.update();
-		
-		// Ball Storage / Launcher
-		if (input.isShooting) {
-			ballLauncher.run(LauncherTarget.Tarmac);
+	public void autonomousInit() {}
 
-			boolean isRev = ballLauncher.getRev();
-			if (isRev)
-				isFeeding = true;
-			if (isFeeding) {
-				ballStorage.runFeed();
-				ballStorage.stopIntake();
-				ballStorage.runStorage();
-			} else {
-				ballStorage.stopFeed();
-				ballStorage.runIntake();
-				ballStorage.stopStorage();
-			}
-		} else {
-			ballLauncher.run(0);
-			ballStorage.runIntake();
-			ballStorage.runAutomatic();
-			isFeeding = false;
-		}
-		
-		// Movement
-		double xInput = input.move.x;
-		double yInput = input.move.y;
-		double zInput = input.move.z;
-		backLeft.set(-(-xInput + yInput - zInput));
-		backRight.set(xInput + yInput + zInput);
-		frontLeft.set(-(xInput + yInput - zInput));
-		frontRight.set(-xInput + yInput + zInput);
-	}
+	@Override
+	public void autonomousPeriodic() {}
 
 	/*
   _______   _                                 _           _ 
@@ -120,16 +81,16 @@ public class Robot extends TimedRobot {
                         | |                                 
                         |_|                                 
 	 */
+
 	@Override
 	public void teleopInit() {
-		initDrivetrain();
-		autoManager.initTeleop();
 		climber.reset();
+		navX.reset(0);
+		mecanumDriveOdom.reset(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		autoManager.update();
 
 		// Manipulator Input
 		double climberLeftInput = manipController.getLeftY();
@@ -174,13 +135,12 @@ public class Robot extends TimedRobot {
 		}
 
 		// Tracking
+		mecanumDriveOdom.update(navX.getAngle());
 		if (alignGoalInput) {
-			Vector3 input = autoManager.alignToGoal();
-			zInput = input.z;
+			// TODO: Align to Goal
 		}
 		if (alignBallInput) {
-			Vector3 input = autoManager.alignToBall();
-			zInput = input.z;
+			// TODO: Align to Ball
 		}
 
 		// Manip Rumble
@@ -270,10 +230,11 @@ public class Robot extends TimedRobot {
 
 		// Drive Train
 		double speed = slowCtrlInput ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;
-		backLeft.set(-speed * (-xInput + yInput - zInput));
-		backRight.set(speed * (xInput + yInput + zInput));
-		frontLeft.set(-speed * (xInput + yInput - zInput));
-		frontRight.set(speed * (-xInput + yInput + zInput));		
+		mecanumDrive.drive(new Vector3(
+			xInput * speed,
+			yInput * speed,
+			zInput * speed
+		));	
 	}
 
 	/*
@@ -285,12 +246,10 @@ public class Robot extends TimedRobot {
     |_|\___||___/\__|
                      
 	*/
+	
 	@Override
-	public void testInit() {
-	}
+	public void testInit() {}
 
 	@Override
-	public void testPeriodic() {
-		autoManager.update();
-	}
+	public void testPeriodic() {}
 }

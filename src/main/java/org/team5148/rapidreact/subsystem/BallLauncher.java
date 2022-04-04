@@ -1,7 +1,7 @@
 package org.team5148.rapidreact.subsystem;
 
-import org.team5148.lib.PIDConfig;
-import org.team5148.lib.PIDSparkMax;
+import org.team5148.lib.drivers.PIDSparkMax;
+import org.team5148.lib.util.PIDConfig;
 import org.team5148.rapidreact.NTManager;
 import org.team5148.rapidreact.config.DefaultSpeed;
 import org.team5148.rapidreact.config.LauncherTarget;

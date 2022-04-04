@@ -1,4 +1,4 @@
-package org.team5148.lib;
+package org.team5148.lib.util;
 
 public class PIDConfig {
     public double p = 0;

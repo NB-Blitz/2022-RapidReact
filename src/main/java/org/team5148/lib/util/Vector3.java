@@ -1,18 +1,21 @@
-package org.team5148.lib;
+package org.team5148.lib.util;
 
-public class Vector3 {
-    public double x = 0;
-    public double y = 0;
+/**
+ * Represents a 3-axis vector
+ */
+public class Vector3 extends Vector2 {
     public double z = 0;
 
-    public Vector3() {}
+    public Vector3() {
+        this.z = 0;
+    }
 
     public Vector3(double x, double y, double z) {
-        this.x = x;
-        this.y = y;
+        super(x, y);
         this.z = z;
     }
 
+    @Override
     public double getMagnitude() {
         return Math.sqrt(x * x + y * y + z * z);
     }

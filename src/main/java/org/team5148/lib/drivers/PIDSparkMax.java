@@ -1,27 +1,24 @@
-package org.team5148.lib;
+package org.team5148.lib.drivers;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
+import org.team5148.lib.util.PIDConfig;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
-public class PIDSparkMax {
+/**
+ * SparkMax wrapper that controls using PID
+ */
+public class PIDSparkMax extends CANSparkMax {
 
-    // Config
-    public String name;
-    public int id;
     public PIDConfig pidConfig;
 
-    // Motor
-    private CANSparkMax motor;
     private RelativeEncoder encoder;
     private SparkMaxPIDController pidController;
-    
-    // Network Tables
     private ShuffleboardTab shuffleboardTab;
     private NetworkTableEntry setVelocityEntry;
     private NetworkTableEntry velocityEntry;
@@ -32,17 +29,10 @@ public class PIDSparkMax {
     private NetworkTableEntry minOutputEntry;
     private NetworkTableEntry maxOutputEntry;
 
-    /**
-     * Controls a SparkMAX using PID
-     * @param name - Name for Network Tables
-     * @param id - CAN ID
-     * @param pidConfig - PID Configuration
-     */
-    public PIDSparkMax(String name, int id, PIDConfig pidConfig) {
-        this.name = name;
-        this.id = id;
+    public PIDSparkMax(String shuffleboardName, int id, PIDConfig pidConfig) {
+        super(id, MotorType.kBrushless);
 
-        shuffleboardTab = Shuffleboard.getTab(name);
+        shuffleboardTab = Shuffleboard.getTab(shuffleboardName);
         setVelocityEntry = shuffleboardTab.add("Set Velocity", 0).getEntry();
         velocityEntry = shuffleboardTab.add("Current Velocity", 0).getEntry();
         pEntry = shuffleboardTab.add("Proportional", 0).getEntry();
@@ -52,9 +42,8 @@ public class PIDSparkMax {
         minOutputEntry = shuffleboardTab.add("Min Output", 0).getEntry();
         maxOutputEntry = shuffleboardTab.add("Max Output", 0).getEntry();
         
-        motor = new CANSparkMax(id, MotorType.kBrushless);
-        encoder = motor.getEncoder();
-        pidController = motor.getPIDController();
+        encoder = this.getEncoder();
+        pidController = this.getPIDController();
         setConfig(pidConfig);
     }
 
@@ -85,7 +74,7 @@ public class PIDSparkMax {
     public void setPercentage(double speed) {
         velocityEntry.setDouble(getVelocity());
         setVelocityEntry.setDouble(0);
-        motor.set(speed);
+        this.set(speed);
     }
 
     /**
@@ -96,7 +85,7 @@ public class PIDSparkMax {
         velocityEntry.setDouble(getVelocity());
         setVelocityEntry.setDouble(velocity);
         if (velocity == 0)
-            motor.stopMotor();
+            this.stopMotor();
         else
             pidController.setReference(
                 velocity,
@@ -119,13 +108,5 @@ public class PIDSparkMax {
      */
     public boolean getRev(double rpmRange) {
         return Math.abs(getVelocity() - setVelocityEntry.getDouble(0)) < rpmRange;
-    }
-
-    /**
-     * Sets the motor to be reversed
-     * @param isInverted - Whether or not the motor is inverted
-     */
-    public void setInverted(boolean isInverted) {
-        motor.setInverted(isInverted);
     }
 }
