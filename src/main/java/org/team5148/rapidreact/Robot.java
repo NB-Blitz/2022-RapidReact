@@ -1,17 +1,12 @@
 package org.team5148.rapidreact;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 
-import org.team5148.lib.auto.MecanumDriveOdom;
 import org.team5148.lib.drivers.MecanumDrive;
-import org.team5148.lib.drivers.NavX;
 import org.team5148.lib.util.Vector3;
+import org.team5148.rapidreact.auto.AutoManager;
 import org.team5148.rapidreact.config.DefaultSpeed;
 import org.team5148.rapidreact.config.LauncherTarget;
 import org.team5148.rapidreact.subsystem.BallLauncher;
@@ -20,31 +15,23 @@ import org.team5148.rapidreact.subsystem.Climber;
 
 public class Robot extends TimedRobot {
 
+	// Constants
 	private final double DEADBAND = 0.2;
 	private final double RUMBLE = 0.2;
 	private final double RAMP = 0.3;
 
+	// Values
 	private boolean isFeeding = false;
 
 	// Controllers
 	private XboxController driveController = new XboxController(0);
 	private XboxController manipController = new XboxController(1);
 
-	// Kinematics
-	Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
-	Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
-	Translation2d m_backLeftLocation = new Translation2d(-0.381, 0.381);
-	Translation2d m_backRightLocation = new Translation2d(-0.381, -0.381);
-	MecanumDriveKinematics m_kinematics = new MecanumDriveKinematics(
-		m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation
-	);
-
-	// Motors
-	private NavX navX = new NavX();
+	// Drivetrain
 	private MecanumDrive mecanumDrive = new MecanumDrive(RAMP);
-	private MecanumDriveOdom mecanumDriveOdom = new MecanumDriveOdom(mecanumDrive, m_kinematics);
 
 	// Subsystems
+	private AutoManager autoManager = new AutoManager(mecanumDrive);
 	private BallLauncher ballLauncher = new BallLauncher();
 	private BallStorage ballStorage = new BallStorage();
 	private Climber climber = new Climber();
@@ -85,8 +72,6 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopInit() {
 		climber.reset();
-		navX.reset(0);
-		mecanumDriveOdom.reset(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
 	}
 
 	@Override
@@ -135,7 +120,7 @@ public class Robot extends TimedRobot {
 		}
 
 		// Tracking
-		mecanumDriveOdom.update(navX.getAngle());
+		autoManager.update();
 		if (alignGoalInput) {
 			// TODO: Align to Goal
 		}
