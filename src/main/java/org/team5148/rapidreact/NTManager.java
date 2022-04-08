@@ -41,6 +41,8 @@ public class NTManager {
     public Field2d simField = new Field2d();
     public ComplexWidget simFieldEntry = simTab.add("Field", simField);
 
+    private NTManager() {}
+
     /**
      * Gets the current instance of NTManager
      * @return Current NTManager Singleton

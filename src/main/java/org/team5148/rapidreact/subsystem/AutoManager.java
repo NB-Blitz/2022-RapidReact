@@ -42,7 +42,7 @@ public class AutoManager {
 
     // Sensors
     private Timer timer = new Timer();
-    private NavX navX = new NavX();
+    private NavX navX = NavX.getInstance();
     /*private TargetCamera goalCamera = new TargetCamera(
         "GoalCamera",
         new Pose2d(),
