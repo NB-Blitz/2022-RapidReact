@@ -1,17 +1,14 @@
 package org.team5148.rapidreact;
 
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
-import org.team5148.lib.drivers.MecanumDrive;
+import org.team5148.lib.controllers.XboxController;
+import org.team5148.lib.drivetrains.Mecanum;
 import org.team5148.lib.util.Vector3;
-import org.team5148.rapidreact.auto.AutoManager;
-import org.team5148.rapidreact.config.DefaultSpeed;
-import org.team5148.rapidreact.config.LauncherTarget;
-import org.team5148.rapidreact.subsystem.BallLauncher;
-import org.team5148.rapidreact.subsystem.BallStorage;
-import org.team5148.rapidreact.subsystem.Climber;
+import org.team5148.rapidreact.subsystem.*;
+import org.team5148.rapidreact.config.*;
 
 public class Robot extends TimedRobot {
 
@@ -24,11 +21,11 @@ public class Robot extends TimedRobot {
 	private boolean isFeeding = false;
 
 	// Controllers
-	private XboxController driveController = new XboxController(0);
-	private XboxController manipController = new XboxController(1);
+	private XboxController driveController = new XboxController(0, DEADBAND);
+	private XboxController manipController = new XboxController(1, DEADBAND);
 
 	// Drivetrain
-	private MecanumDrive mecanumDrive = new MecanumDrive(RAMP);
+	private Mecanum mecanumDrive = new Mecanum();
 
 	// Subsystems
 	private AutoManager autoManager = new AutoManager(mecanumDrive);
@@ -37,7 +34,9 @@ public class Robot extends TimedRobot {
 	private Climber climber = new Climber();
 
 	@Override
-	public void robotInit() {}
+	public void robotInit() {
+		mecanumDrive.setRampRate(RAMP);
+	}
 
 	@Override
 	public void robotPeriodic() {}
@@ -53,7 +52,9 @@ public class Robot extends TimedRobot {
 	 */
 
 	@Override
-	public void autonomousInit() {}
+	public void autonomousInit() {
+		autoManager.reset();
+	}
 
 	@Override
 	public void autonomousPeriodic() {}
@@ -100,18 +101,6 @@ public class Robot extends TimedRobot {
 		double xInput = driveController.getLeftX();
 		double yInput = -driveController.getLeftY();
 		double zInput = DefaultSpeed.ROTATE * -driveController.getRightX();
-
-		// Deadband
-		if (Math.abs(xInput) < DEADBAND)
-			xInput = 0;
-		if (Math.abs(yInput) < DEADBAND)
-			yInput = 0;
-		if (Math.abs(zInput) < DEADBAND)
-			zInput = 0;
-		if (Math.abs(climberLeftInput) < DEADBAND)
-			climberLeftInput = 0;
-		if (Math.abs(climberRightInput) < DEADBAND)
-			climberRightInput = 0;
 		
 		// Reverse
 		if (reverseCtrlInput) {
@@ -237,4 +226,14 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void testPeriodic() {}
+
+	@Override
+	public void startCompetition() {
+		Shuffleboard.startRecording();
+	}
+
+	@Override
+	public void endCompetition() {
+		Shuffleboard.stopRecording();
+	}
 }

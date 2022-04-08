@@ -6,13 +6,16 @@ package org.team5148.lib.util;
 public class Vector3 extends Vector2 {
     public double z = 0;
 
-    public Vector3() {
-        this.z = 0;
-    }
-
+    public Vector3() {}
     public Vector3(double x, double y, double z) {
         super(x, y);
         this.z = z;
+    }
+
+    @Override
+    public void rotate(double angle) {
+        super.rotate(angle);
+        this.z += angle;
     }
 
     @Override

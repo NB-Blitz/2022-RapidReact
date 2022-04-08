@@ -1,4 +1,4 @@
-package org.team5148.lib.vision;
+package org.team5148.lib.sensors;
 
 import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -12,24 +12,24 @@ import edu.wpi.first.math.util.Units;
 /**
  * PhotonCamera wrapper that tracks stationary targets
  */
-public class FieldCamera extends ObjectCamera {
+public class TargetCamera extends ObjectCamera {
     private Pose2d m_targetPose;
     private double m_cameraHeightMeters;
     private double m_cameraPitchRadians;
     private double m_targetHeightMeters;
 
-    public FieldCamera(
-        String pm_cameraName,
-        Pose2d pm_targetPose,
-        double pm_cameraHeightInches,
-        double pm_cameraPitchDegrees,
-        double pm_targetHeightInches) {
+    public TargetCamera(
+        String cameraName,
+        Pose2d targetPose,
+        double cameraHeightInches,
+        double cameraPitchDegrees,
+        double targetHeightInches) {
             
-        super(pm_cameraName);
-        this.m_targetPose = pm_targetPose;
-        this.m_cameraHeightMeters = Units.inchesToMeters(pm_cameraHeightInches);
-        this.m_cameraPitchRadians = Units.degreesToRadians(pm_cameraPitchDegrees);
-        this.m_targetHeightMeters = Units.inchesToMeters(pm_targetHeightInches);
+        super(cameraName);
+        this.m_targetPose = targetPose;
+        this.m_cameraHeightMeters = Units.inchesToMeters(cameraHeightInches);
+        this.m_cameraPitchRadians = Units.degreesToRadians(cameraPitchDegrees);
+        this.m_targetHeightMeters = Units.inchesToMeters(targetHeightInches);
     }
 
     /**

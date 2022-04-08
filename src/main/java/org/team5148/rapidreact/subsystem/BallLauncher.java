@@ -1,6 +1,6 @@
 package org.team5148.rapidreact.subsystem;
 
-import org.team5148.lib.drivers.PIDSparkMax;
+import org.team5148.lib.motors.PIDSparkMax;
 import org.team5148.lib.util.PIDConfig;
 import org.team5148.rapidreact.NTManager;
 import org.team5148.rapidreact.config.DefaultSpeed;
@@ -10,7 +10,7 @@ import org.team5148.rapidreact.config.MotorIDs;
 public class BallLauncher {
     private static final double REV_RANGE = 100;
 
-    private PIDConfig pidConfig = new PIDConfig(0.0002, 0.000001, 0.00001, 0.0000001, -1, 1);
+    private PIDConfig pidConfig = new PIDConfig(0.0002, 0.000001, 0.00001);
     private PIDSparkMax topMotor = new PIDSparkMax("Top Launcher", MotorIDs.LAUNCHER_TOP, pidConfig);
     private PIDSparkMax bottomMotor = new PIDSparkMax("Bottom Launcher", MotorIDs.LAUNCHER_BOTTOM, pidConfig);
 

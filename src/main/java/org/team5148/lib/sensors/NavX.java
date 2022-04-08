@@ -1,4 +1,4 @@
-package org.team5148.lib.drivers;
+package org.team5148.lib.sensors;
 
 import com.kauailabs.navx.frc.AHRS;
 
@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.SPI;
 
 /**
- * NavX wrapper that caches RoboRIO kMXP calls
+ * NavX wrapper
  */
 public class NavX {
     private AHRS m_navx;
@@ -24,11 +24,18 @@ public class NavX {
     }
 
     /**
-     * Resets gyro angle to set value
-     * @param pm_robotAngle - Robot angle in degrees
+     * Resets gyro angle to 0
      */
-    public void reset(double pm_robotAngle) {
+    public void reset() {
+        reset(new Rotation2d());
+    }
+
+    /**
+     * Resets gyro angle to set value
+     * @param gyroAngle - Robot angle in degrees
+     */
+    public void reset(Rotation2d gyroAngle) {
         this.m_navx.reset();
-        this.m_navx.setAngleAdjustment(pm_robotAngle);
+        this.m_navx.setAngleAdjustment(gyroAngle.getDegrees());
     }
 }

@@ -1,4 +1,4 @@
-package org.team5148.lib.vision;
+package org.team5148.lib.sensors;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
