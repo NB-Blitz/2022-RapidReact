@@ -8,6 +8,10 @@ import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 public class VictorSPX extends com.ctre.phoenix.motorcontrol.can.VictorSPX implements MotorController {
     private double m_lastSpeed = Double.NaN;
 
+    /**
+     * Initializes a VictorSPX
+     * @param id - CAN ID of the VictorSPX
+     */
     public VictorSPX(int id) {
         super(id);
     }

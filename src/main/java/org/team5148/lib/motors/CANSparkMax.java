@@ -4,7 +4,7 @@ package org.team5148.lib.motors;
  * SparkMax wrapper that decreases CAN bus traffic
  */
 public class CANSparkMax extends com.revrobotics.CANSparkMax implements MotorController {
-    private double m_lastSpeed = Double.NaN;
+    public double m_lastSpeed = Double.NaN;
 
     /**
      * Creates a brushless Spark Max

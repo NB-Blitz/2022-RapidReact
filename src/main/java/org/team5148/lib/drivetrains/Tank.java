@@ -6,7 +6,7 @@ import org.team5148.lib.util.Vector2;
 import org.team5148.lib.util.Vector3;
 
 /**
- * Controls a Tank drivetrain
+ * Controls a tank drivetrain
  */
 public class Tank extends Drivetrain {
     public MotorController m_frontLeftMotor;
@@ -14,6 +14,9 @@ public class Tank extends Drivetrain {
     public MotorController m_backLeftMotor;
     public MotorController m_backRightMotor;
 
+    /**
+     * Initializes a tank drivetrain using 4 CANSparkMaxs
+     */
     public Tank() {
         this(
             new CANSparkMax(1),
@@ -23,6 +26,13 @@ public class Tank extends Drivetrain {
         );
     }
 
+    /**
+     * Initializes a tank drivetrain using 4 motor controllers
+     * @param frontLeftMotor - Front Left Motor
+     * @param frontRightMotor - Front Right Motor
+     * @param backLeftMotor - Back Left Motor
+     * @param backRightMotor - Back Right Motor
+     */
     public Tank(
         MotorController frontLeftMotor,
         MotorController frontRightMotor,

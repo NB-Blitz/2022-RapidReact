@@ -8,6 +8,10 @@ import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 public class TalonSRX extends com.ctre.phoenix.motorcontrol.can.TalonSRX implements MotorController {
     private double m_lastSpeed = Double.NaN;
 
+    /**
+     * Initializes a TalonSRX
+     * @param id - CAN ID of the TalonSRX
+     */
     public TalonSRX(int id) {
         super(id);
     }

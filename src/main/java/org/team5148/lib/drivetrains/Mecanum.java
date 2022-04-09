@@ -6,7 +6,7 @@ import org.team5148.lib.util.Vector2;
 import org.team5148.lib.util.Vector3;
 
 /**
- * Controls a Mecanum drivetrain
+ * Controls a mecanum drivetrain
  */
 public class Mecanum extends Drivetrain {
     public MotorController m_frontLeftMotor;
@@ -14,6 +14,9 @@ public class Mecanum extends Drivetrain {
     public MotorController m_backLeftMotor;
     public MotorController m_backRightMotor;
 
+    /**
+     * Initializes a mecanum drivetrain using 4 CANSparkMaxs
+     */
     public Mecanum() {
         this(
             new CANSparkMax(1),
@@ -23,6 +26,13 @@ public class Mecanum extends Drivetrain {
         );
     }
 
+    /**
+     * Initializes a mecanum drivetrain using 4 motor controllers
+     * @param frontLeftMotor - Front Left Motor
+     * @param frontRightMotor - Front Right Motor
+     * @param backLeftMotor - Back Left Motor
+     * @param backRightMotor - Back Right Motor
+     */
     public Mecanum(
         MotorController frontLeftMotor,
         MotorController frontRightMotor,
@@ -34,7 +44,7 @@ public class Mecanum extends Drivetrain {
         m_backLeftMotor = backLeftMotor;
         m_backRightMotor = backRightMotor;
     }
-
+    
     public void setRampRate(double ramp) {
         m_frontLeftMotor.setRampRate(ramp);
         m_frontRightMotor.setRampRate(ramp);

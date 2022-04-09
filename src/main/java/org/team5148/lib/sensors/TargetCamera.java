@@ -18,6 +18,14 @@ public class TargetCamera extends ObjectCamera {
     private double m_cameraPitchRadians;
     private double m_targetHeightMeters;
 
+    /**
+     * Initializes a PhotonCamera that tracks field targets
+     * @param cameraName - Name of the PhotonVision camera
+     * @param targetPose - Position of the target relative to the field
+     * @param cameraHeightInches - Height of the camera on the robot in inches
+     * @param cameraPitchDegrees - Angle of the camera on the robot in degrees
+     * @param targetHeightInches - Height of the target on the field in inches
+     */
     public TargetCamera(
         String cameraName,
         Pose2d targetPose,
@@ -33,8 +41,26 @@ public class TargetCamera extends ObjectCamera {
     }
 
     /**
-     * Gets the target pose
-     * @return Global target Pose2d
+     * Gets the distance from the active target
+     * @return Distance from target in meters. -1 if none is found.
+     */
+    public double getTargetDistance() {
+        PhotonPipelineResult lv_photonResult = this.getLatestResult();
+        if (lv_photonResult.hasTargets()) {
+            PhotonTrackedTarget lv_photonTarget = lv_photonResult.getBestTarget();
+            return PhotonUtils.calculateDistanceToTargetMeters(
+                m_cameraHeightMeters,
+                m_targetHeightMeters,
+                m_cameraPitchRadians,
+                lv_photonTarget.getPitch()
+            );
+        }
+        return -1;
+    }
+
+    /**
+     * Gets the estimated robot pose
+     * @return Global robot pose. Null if none is found. 
      */
     public Pose2d getRobotPose(Rotation2d gyroAngle) {
         PhotonPipelineResult lv_photonResult = this.getLatestResult();

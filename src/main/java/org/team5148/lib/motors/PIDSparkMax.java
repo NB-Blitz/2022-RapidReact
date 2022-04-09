@@ -1,10 +1,8 @@
 package org.team5148.lib.motors;
 
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
 
-import org.team5148.lib.util.PIDConfig;
-
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -14,80 +12,97 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
  */
 public class PIDSparkMax extends CANSparkMax {
 
-    private PIDConfig m_pidConfig;
     private RelativeEncoder m_encoder;
-    private PIDController m_pidController;
-    private double m_setpoint = 0;
-
-    // Network Tables
+    private SparkMaxPIDController m_pidController;
+    private double m_lastVelocity;
+    private double m_lastPosition;
+    
     private ShuffleboardTab m_shuffleboardTab;
-    private NetworkTableEntry m_setValueEntry;
+    private NetworkTableEntry m_setVelocityEntry;
+    private NetworkTableEntry m_setPositionEntry;
     private NetworkTableEntry m_velocityEntry;
 
-    public PIDSparkMax(String shuffleboardName, int id, PIDConfig pidConfig) {
+    /**
+     * Initializes a SparkMAX that utilized PID
+     * @param shuffleboardName - Shuffleboard tab to send network table values to
+     * @param id - CAN ID of the SparkMAX
+     */
+    public PIDSparkMax(String shuffleboardTabName, int id) {
         super(id);
 
-        m_pidController = new PIDController(pidConfig.kP, pidConfig.kI, pidConfig.kD);
+        m_encoder = getEncoder();
+        m_pidController = getPIDController();
+        m_lastVelocity = Double.NaN;
+        m_lastPosition = Double.NaN;
 
-        m_shuffleboardTab = Shuffleboard.getTab(shuffleboardName);
-        m_setValueEntry = m_shuffleboardTab.add("Set Value", 0).getEntry();
+        m_shuffleboardTab = Shuffleboard.getTab(shuffleboardTabName);
+        m_setVelocityEntry = m_shuffleboardTab.add("Set Velocity", 0).getEntry();
+        m_setPositionEntry = m_shuffleboardTab.add("Set Position", 0).getEntry();
         m_velocityEntry = m_shuffleboardTab.add("Current Velocity", 0).getEntry();
-        m_shuffleboardTab.add("PID Controller", m_pidController);
-        
-        m_encoder = this.getEncoder();
-        
-        setConfig(pidConfig);
+        m_shuffleboardTab.add("PID Controller", getPIDController());
     }
 
-    /**
-     * Sets the PID configuration
-     * @param pidConfig - PID Configuration
-     */
-    public void setConfig(PIDConfig pidConfig) {
-        m_pidController.setP(pidConfig.kP);
-        m_pidController.setI(pidConfig.kI);
-        m_pidController.setD(pidConfig.kD);
-
-        this.m_pidConfig = pidConfig;
+    private void updateNT() {
+        m_velocityEntry.setDouble(getVelocity());
+        m_setPositionEntry.setDouble(m_lastPosition);
+        m_setVelocityEntry.setDouble(m_lastSpeed);
     }
 
-    /**
-     * Sets the speed of the motor
-     * @param speed - Speed in Percent [-1 - 1]
-     */
-    public void setPercentage(double speed) {
-        double currentVelocity = getVelocity();
+    @Override
+    public void set(double speed) {
+        super.set(speed);
 
-        m_velocityEntry.setDouble(currentVelocity);
-        m_setValueEntry.setValue(speed);
-        m_setpoint = 0;
-        
-        set(speed);
+        m_lastVelocity = Double.NaN;
+        m_lastPosition = Double.NaN;
+        updateNT();
     }
 
     /**
      * Sets the velocity of the motor
-     * @param setVelocity - Velocity in RPM
+     * @param velocity - Velocity in RPM * Conversion Factor
      */
-    public void setVelocity(double setVelocity) {
-        double currentVelocity = getVelocity();
-        double setValue = m_pidController.calculate(currentVelocity, setVelocity);
-        if (setVelocity == 0)
-            setValue = 0;
+    public void setVelocity(double velocity) {
+        if (m_lastVelocity != velocity) {
+            m_pidController.setReference(velocity, ControlType.kVelocity);
+        }
 
-        m_velocityEntry.setDouble(currentVelocity);
-        m_setValueEntry.setValue(setValue);
-        m_setpoint = 0;
-        
-        set(setValue);
+        m_lastSpeed = Double.NaN;
+        m_lastPosition = Double.NaN;
+        m_lastVelocity = velocity;
+        updateNT();
     }
 
     /**
-     * Gets the current motor velocity from it's encoders
-     * @return Current velocity in RPM
+     * Sets the position of the motor
+     * @param velocity - Position in Rotations * Conversion Factor
+     */
+    public void setPosition(double position) {
+        if (m_lastPosition != position) {
+            m_pidController.setReference(position, ControlType.kPosition);
+        }
+
+        m_lastSpeed = Double.NaN;
+        m_lastPosition = position;
+        m_lastVelocity = Double.NaN;
+        updateNT();
+    }
+
+    /**
+     * Gets the current encoder velocity from it's encoders.
+     * Note: Encoders have ~110ms delay built-in to the SparkMAXs.
+     * @return Current velocity in RPM * Conversion
      */
     public double getVelocity() {
         return m_encoder.getVelocity();
+    }
+
+    /**
+     * Gets the current encoder position from it's encoders.
+     * Note: Encoders have ~110ms delay built-in to the SparkMAXs.
+     * @return Current position in Rotations * Conversion
+     */
+    public double getPosition() {
+        return m_encoder.getPosition();
     }
 
     /**
@@ -96,14 +111,6 @@ public class PIDSparkMax extends CANSparkMax {
      * @return True if the motor is up to speed. False otherwise.
      */
     public boolean getRev(double rpmRange) {
-        return Math.abs(getVelocity() - m_setpoint) < rpmRange;
-    }
-
-    /**
-     * Gets the PID configuration
-     * @return The current PIDConfig
-     */
-    public PIDConfig getConfig() {
-        return m_pidConfig;
+        return Math.abs(getVelocity() - m_lastVelocity) < rpmRange;
     }
 }

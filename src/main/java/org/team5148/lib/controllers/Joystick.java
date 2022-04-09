@@ -4,7 +4,7 @@ import org.team5148.lib.util.BlitzMath;
 import org.team5148.lib.util.Vector3;
 
 /**
- * Represents a 2-axis joystick connected to the driverstation
+ * Represents a 2-axis joystick connected to the DriverStation
  */
 public class Joystick extends edu.wpi.first.wpilibj.Joystick {
     private double m_deadband = 0;

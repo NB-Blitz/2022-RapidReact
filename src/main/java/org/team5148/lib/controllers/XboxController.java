@@ -4,7 +4,7 @@ import org.team5148.lib.util.BlitzMath;
 import org.team5148.lib.util.Vector2;
 
 /**
- * Represents an Xbox Controller connected to the Driver Station
+ * Represents an Xbox Controller connected to the DriverStation
  */
 public class XboxController extends edu.wpi.first.wpilibj.XboxController {
     private double m_deadband = 0;
