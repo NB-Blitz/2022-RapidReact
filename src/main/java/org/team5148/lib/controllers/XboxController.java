@@ -1,5 +1,8 @@
 package org.team5148.lib.controllers;
 
+import org.team5148.lib.util.BlitzMath;
+import org.team5148.lib.util.Vector2;
+
 /**
  * Represents an Xbox Controller connected to the Driver Station
  */
@@ -14,7 +17,7 @@ public class XboxController extends edu.wpi.first.wpilibj.XboxController {
         super(id);
     }
 
-     /**
+    /**
      * Initializes an Xbox Controller with deadband
      * @param id - Port # of the controller
      * @param deadband - Deadband of the controller [0 - 1]
@@ -23,7 +26,6 @@ public class XboxController extends edu.wpi.first.wpilibj.XboxController {
         super(id);
         this.m_deadband = deadband;
     }
-
 
     /**
      * Sets the controller deadband
@@ -35,9 +37,28 @@ public class XboxController extends edu.wpi.first.wpilibj.XboxController {
 
     @Override
     public double getRawAxis(int axisID) {
-        double value = super.getRawAxis(axisID);
-        if (Math.abs(value) < m_deadband)
-            return 0;
-        return (value - ((m_deadband * Math.abs(value)) / value)) / (1 - m_deadband);
+        return BlitzMath.applyDeadband(m_deadband, super.getRawAxis(axisID));
+    }
+
+    /**
+     * Gets the left joystick position
+     * @return Left joystick as a Vector2
+     */
+    public Vector2 getLeftJoystick() {
+        return new Vector2(
+            getLeftX(),
+            getLeftY()
+        );
+    }
+
+    /**
+     * Gets the right joystick position
+     * @return Right joystick as a Vector2
+     */
+    public Vector2 getRightJoystick() {
+        return new Vector2(
+            getRightX(),
+            getRightY()
+        );
     }
 }
