@@ -2,7 +2,6 @@ package org.team5148.rapidreact;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 import org.team5148.lib.controllers.XboxController;
 import org.team5148.lib.drivetrains.Mecanum;
@@ -15,7 +14,6 @@ public class Robot extends TimedRobot {
 	// Constants
 	private final double DEADBAND = 0.2;
 	private final double RUMBLE = 0.2;
-	private final double RAMP = 0.3;
 
 	// Values
 	private boolean isFeeding = false;
@@ -28,15 +26,13 @@ public class Robot extends TimedRobot {
 	private Mecanum mecanumDrive = new Mecanum();
 
 	// Subsystems
-	private AutoManager autoManager = new AutoManager(mecanumDrive);
+	private AutoManager autoManager = new AutoManager();
 	private BallLauncher ballLauncher = new BallLauncher();
 	private BallStorage ballStorage = new BallStorage();
 	private Climber climber = new Climber();
 
 	@Override
-	public void robotInit() {
-		mecanumDrive.setRampRate(RAMP);
-	}
+	public void robotInit() {}
 
 	@Override
 	public void robotPeriodic() {}
@@ -52,9 +48,7 @@ public class Robot extends TimedRobot {
 	 */
 
 	@Override
-	public void autonomousInit() {
-		autoManager.reset();
-	}
+	public void autonomousInit() {}
 
 	@Override
 	public void autonomousPeriodic() {}
@@ -97,7 +91,6 @@ public class Robot extends TimedRobot {
 		boolean reverseCtrlInput = driveController.getLeftBumper();
 		boolean slowCtrlInput = driveController.getRightBumper();
 		boolean alignGoalInput = driveController.getAButton();
-		boolean alignBallInput = driveController.getYButton();
 		double xInput = driveController.getLeftX();
 		double yInput = -driveController.getLeftY();
 		double zInput = DefaultSpeed.ROTATE * -driveController.getRightX();
@@ -109,12 +102,8 @@ public class Robot extends TimedRobot {
 		}
 
 		// Tracking
-		autoManager.update();
 		if (alignGoalInput) {
-			// TODO: Align to Goal
-		}
-		if (alignBallInput) {
-			// TODO: Align to Ball
+			// Placeholder
 		}
 
 		// Manip Rumble
@@ -226,14 +215,4 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void testPeriodic() {}
-
-	@Override
-	public void startCompetition() {
-		Shuffleboard.startRecording();
-	}
-
-	@Override
-	public void endCompetition() {
-		Shuffleboard.stopRecording();
-	}
 }

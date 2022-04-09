@@ -44,13 +44,6 @@ public class Mecanum extends Drivetrain {
         m_backLeftMotor = backLeftMotor;
         m_backRightMotor = backRightMotor;
     }
-    
-    public void setRampRate(double ramp) {
-        m_frontLeftMotor.setRampRate(ramp);
-        m_frontRightMotor.setRampRate(ramp);
-        m_backLeftMotor.setRampRate(ramp);
-        m_backRightMotor.setRampRate(ramp);
-    }
 
     public void drive(Vector2 input) {
         drive(new Vector3(

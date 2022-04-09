@@ -30,8 +30,4 @@ public class CANSparkMax extends com.revrobotics.CANSparkMax implements MotorCon
             super.set(speed);
         }
     }
-
-    public void setRampRate(double ramp) {
-        this.setOpenLoopRampRate(ramp);
-    }
 }

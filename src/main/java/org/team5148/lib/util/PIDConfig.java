@@ -13,6 +13,8 @@ public class PIDConfig {
      * @param p - Proportional [0 - 1]
      * @param i - Integral [0 - 1]
      * @param d - Derivative [0 - 1]
+     * 
+     * @deprecated Flash PID directly to the motor controller instead
      */
     public PIDConfig(double p, double i, double d) {
         this.kP = p;

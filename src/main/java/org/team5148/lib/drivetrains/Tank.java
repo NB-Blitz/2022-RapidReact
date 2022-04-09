@@ -45,13 +45,6 @@ public class Tank extends Drivetrain {
         m_backRightMotor = backRightMotor;
     }
 
-    public void setRampRate(double ramp) {
-        m_frontLeftMotor.setRampRate(ramp);
-        m_frontRightMotor.setRampRate(ramp);
-        m_backLeftMotor.setRampRate(ramp);
-        m_backRightMotor.setRampRate(ramp);
-    }
-
     public void drive(Vector2 input) {
         m_frontLeftMotor.set(input.y - input.x);
         m_backLeftMotor.set(input.y - input.x);

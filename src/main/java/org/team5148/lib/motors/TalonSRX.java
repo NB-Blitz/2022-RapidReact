@@ -22,8 +22,4 @@ public class TalonSRX extends com.ctre.phoenix.motorcontrol.can.TalonSRX impleme
             super.set(TalonSRXControlMode.PercentOutput, speed);
         }
     }
-
-    public void setRampRate(double ramp) {
-        this.configOpenloopRamp(ramp);
-    }
 }

@@ -19,12 +19,6 @@ public abstract class Drivetrain {
      */
     public abstract void drive(Vector3 input);
 
-     /**
-     * Sets the ramp rate of all of the motors
-     * @param rampRate - Seconds from 0 to full throttle
-     */
-    public abstract void setRampRate(double rampRate);
-
     /**
      * Drives the drivetrain using field-oriented drive
      * @param input - 3-Axis Input

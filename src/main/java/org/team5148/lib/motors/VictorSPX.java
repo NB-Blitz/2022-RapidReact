@@ -22,8 +22,4 @@ public class VictorSPX extends com.ctre.phoenix.motorcontrol.can.VictorSPX imple
             super.set(VictorSPXControlMode.PercentOutput, speed);
         }
     }
-
-    public void setRampRate(double ramp) {
-        this.configOpenloopRamp(ramp);
-    }
 }
