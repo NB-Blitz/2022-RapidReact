@@ -20,6 +20,7 @@ public class PIDSparkMax extends CANSparkMax {
     private ShuffleboardTab m_shuffleboardTab;
     private NetworkTableEntry m_setVelocityEntry;
     private NetworkTableEntry m_setPositionEntry;
+    private NetworkTableEntry m_setSpeedEntry;
     private NetworkTableEntry m_velocityEntry;
 
     /**
@@ -38,20 +39,21 @@ public class PIDSparkMax extends CANSparkMax {
         m_shuffleboardTab = Shuffleboard.getTab(shuffleboardTabName);
         m_setVelocityEntry = m_shuffleboardTab.add("Set Velocity", 0).getEntry();
         m_setPositionEntry = m_shuffleboardTab.add("Set Position", 0).getEntry();
+        m_setSpeedEntry = m_shuffleboardTab.add("Set Speed", 0).getEntry();
         m_velocityEntry = m_shuffleboardTab.add("Current Velocity", 0).getEntry();
-        m_shuffleboardTab.add("PID Controller", getPIDController());
     }
 
     private void updateNT() {
         m_velocityEntry.setDouble(getVelocity());
         m_setPositionEntry.setDouble(m_lastPosition);
-        m_setVelocityEntry.setDouble(m_lastSpeed);
+        m_setVelocityEntry.setDouble(m_lastVelocity);
+        m_setSpeedEntry.setDouble(m_lastSpeed);
     }
 
     @Override
     public void set(double speed) {
         super.set(speed);
-
+        
         m_lastVelocity = Double.NaN;
         m_lastPosition = Double.NaN;
         updateNT();

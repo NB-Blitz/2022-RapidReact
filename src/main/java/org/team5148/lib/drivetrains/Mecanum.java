@@ -54,25 +54,12 @@ public class Mecanum extends Drivetrain {
     }
 
     public void drive(Vector3 input) {
-        double theta = Math.atan2(input.y, input.x);
-        double power = Math.hypot(input.x, input.y);
-        double turn = input.z;
-        
-        double sin = Math.sin(theta - Math.PI / 4);
-        double cos = Math.cos(theta - Math.PI / 4);
-        double max = Math.max(Math.abs(sin), Math.abs(cos));
+        double denominator = Math.max(Math.abs(input.x) + Math.abs(input.y) + Math.abs(input.z), 1);
 
-        double frontLeft = power * cos/max + turn;
-        double frontRight = power * sin/max - turn;
-        double backLeft = power * sin/max + turn;
-        double backRight = power * cos/max - turn;
-
-        if ((power + Math.abs(turn)) > 1) {
-            frontLeft /= power + turn;
-            frontRight /= power + turn;
-            backLeft /= power + turn;
-            backRight /= power + turn;
-        }
+        double frontLeft = (input.x + input.y + input.z) / denominator;
+        double frontRight = (-input.x + input.y - input.z) / denominator;
+        double backLeft = (-input.x + input.y + input.z) / denominator;
+        double backRight = (input.x + input.y - input.z) / denominator;
 
         m_frontLeftMotor.set(frontLeft);
         m_frontRightMotor.set(frontRight);

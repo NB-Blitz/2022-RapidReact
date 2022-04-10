@@ -39,4 +39,11 @@ public class MecanumOdom {
 
         return pose;
     }
+
+    /**
+     * Resets the current odometry pose model
+     */
+    public void reset() {
+        m_odometry.resetPosition(new Pose2d(), m_navX.getAngle());
+    }
 }

@@ -1,10 +1,13 @@
 package org.team5148.rapidreact;
 
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 
+import com.revrobotics.REVPhysicsSim;
+
 import org.team5148.lib.controllers.XboxController;
-import org.team5148.lib.drivetrains.Mecanum;
+import org.team5148.lib.drivetrains.MecanumPID;
 import org.team5148.lib.util.Vector3;
 import org.team5148.rapidreact.subsystem.*;
 import org.team5148.rapidreact.config.*;
@@ -23,13 +26,16 @@ public class Robot extends TimedRobot {
 	private XboxController manipController = new XboxController(1, DEADBAND);
 
 	// Drivetrain
-	private Mecanum mecanumDrive = new Mecanum();
+	private MecanumPID mecanumDrive = new MecanumPID();
 
 	// Subsystems
-	private AutoManager autoManager = new AutoManager();
+	private AutoManager autoManager = new AutoManager(mecanumDrive);
 	private BallLauncher ballLauncher = new BallLauncher();
 	private BallStorage ballStorage = new BallStorage();
 	private Climber climber = new Climber();
+
+	// Simulation
+	private REVPhysicsSim revPhysicsSim = REVPhysicsSim.getInstance();
 
 	@Override
 	public void robotInit() {}
@@ -67,10 +73,12 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopInit() {
 		climber.reset();
+		autoManager.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
+		autoManager.update();
 
 		// Manipulator Input
 		double climberLeftInput = manipController.getLeftY();
@@ -215,4 +223,17 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void testPeriodic() {}
+
+	@Override
+	public void simulationInit() {
+		revPhysicsSim.addSparkMax(mecanumDrive.m_frontLeftMotor, DCMotor.getNEO(1));
+		revPhysicsSim.addSparkMax(mecanumDrive.m_frontRightMotor, DCMotor.getNEO(1));
+		revPhysicsSim.addSparkMax(mecanumDrive.m_backLeftMotor, DCMotor.getNEO(1));
+		revPhysicsSim.addSparkMax(mecanumDrive.m_backRightMotor, DCMotor.getNEO(1));
+	}
+
+	@Override
+	public void simulationPeriodic() {
+		revPhysicsSim.run();
+	}
 }
