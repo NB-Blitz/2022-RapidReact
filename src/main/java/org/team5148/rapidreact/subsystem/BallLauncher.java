@@ -40,6 +40,13 @@ public class BallLauncher {
         run(velocity);
     }
 
+    public void runAuto(double goalDistance) {
+        double lastVelocity = nt.launcherSetVel.getDouble(0);
+        double velocity = goalDistance == 0 ? lastVelocity : ((4.7 * goalDistance) + 2218);
+        nt.launcherSetVel.setDouble(velocity);
+        run(velocity);
+    }
+
     /**
      * Stops the launcher motors
      */

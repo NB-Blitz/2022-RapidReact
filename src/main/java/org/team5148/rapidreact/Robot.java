@@ -139,7 +139,7 @@ public class Robot extends TimedRobot {
 		boolean intakeInput =  manipController.getRightBumper();
 		boolean shootLowGoalInput = manipController.getYButton();
 		boolean shootTarmacInput = manipController.getXButton();
-		boolean shootFieldWallInput = manipController.getBButton();
+		boolean shootAutoDistInput = manipController.getBButton();
 		boolean shootLaunchpadInput = manipController.getAButton();
 		boolean primeInput = manipController.getLeftTriggerAxis() > DEADBAND || manipController.getRightTriggerAxis() > DEADBAND;
 		double povInput = manipController.getPOV();
@@ -150,12 +150,13 @@ public class Robot extends TimedRobot {
 		boolean reverseCtrlInput = driveController.getLeftBumper();
 		boolean slowCtrlInput = driveController.getRightBumper();
 		boolean alignGoalInput = driveController.getAButton();
-		boolean alignBallInput = driveController.getYButton();
 		double xInput = driveController.getLeftX();
 		double yInput = -driveController.getLeftY();
 		double zInput = DefaultSpeed.ROTATE * -driveController.getRightX();
 
 		// Deadband
+		boolean isShooting = shootAutoDistInput || shootLaunchpadInput || shootLowGoalInput || shootTarmacInput;
+		double speed = (slowCtrlInput || isShooting) ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;
 		if (Math.abs(xInput) < DEADBAND)
 			xInput = 0;
 		if (Math.abs(yInput) < DEADBAND)
@@ -176,11 +177,7 @@ public class Robot extends TimedRobot {
 		// Tracking
 		if (alignGoalInput) {
 			Vector3 input = autoManager.alignToGoal();
-			zInput = input.z;
-		}
-		if (alignBallInput) {
-			Vector3 input = autoManager.alignToBall();
-			zInput = input.z;
+			zInput = input.z / speed;
 		}
 
 		// Manip Rumble
@@ -193,15 +190,14 @@ public class Robot extends TimedRobot {
 		}
 
 		// Ball Launcher
-		boolean isShooting = shootFieldWallInput || shootLaunchpadInput || shootLowGoalInput || shootTarmacInput;
 		if (shootLowGoalInput)
 			ballLauncher.run(LauncherTarget.LowGoal);
 		else if (shootTarmacInput)
 			ballLauncher.run(LauncherTarget.Tarmac);
 		else if (shootLaunchpadInput)
 			ballLauncher.run(LauncherTarget.Launchpad);
-		else if (shootFieldWallInput)
-			ballLauncher.run(LauncherTarget.FieldWall);
+		else if (shootAutoDistInput)
+			ballLauncher.runAuto(autoManager.getGoalDistance());
 		else
 			ballLauncher.stop();
 
@@ -269,7 +265,6 @@ public class Robot extends TimedRobot {
 		}
 
 		// Drive Train
-		double speed = slowCtrlInput ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;
 		backLeft.set(-speed * (-xInput + yInput - zInput));
 		backRight.set(speed * (xInput + yInput + zInput));
 		frontLeft.set(-speed * (xInput + yInput - zInput));
@@ -291,6 +286,6 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void testPeriodic() {
-		autoManager.update();
+		autoManager.getGoalDistance();
 	}
 }
