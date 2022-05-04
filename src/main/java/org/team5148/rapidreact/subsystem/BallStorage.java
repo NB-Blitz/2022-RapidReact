@@ -2,6 +2,7 @@ package org.team5148.rapidreact.subsystem;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -15,7 +16,7 @@ public class BallStorage {
 
     private CANSparkMax intakeMotor = new CANSparkMax(MotorIDs.INTAKE, MotorType.kBrushless);
     private TalonSRX feedMotor = new TalonSRX(MotorIDs.FEED);
-    private TalonSRX leftStorageMotor = new TalonSRX(MotorIDs.LEFT_STORAGE);
+    private VictorSPX leftStorageMotor = new VictorSPX(MotorIDs.LEFT_STORAGE);
     private TalonSRX rightStorageMotor = new TalonSRX(MotorIDs.RIGHT_STORAGE);
     
     private DigitalInput lineBreakBegin = new DigitalInput(0);
@@ -49,32 +50,33 @@ public class BallStorage {
      * Stops the storage motor
      */
     public void stopStorage() {
-        runStorage(0);
+        runStorage(0, 0);
     }
 
     /**
      * Runs storage motor
      */
     public void runStorage() {
-        double storageSpeed = nt.storageSpeed.getDouble(DefaultSpeed.STORAGE);
-        runStorage(storageSpeed);
+        double leftStorageSpeed = nt.leftStorageSpeed.getDouble(DefaultSpeed.LEFT_STORAGE);
+        double rightStorageSpeed = nt.rightStorageSpeed.getDouble(DefaultSpeed.RIGHT_STORAGE);
+        runStorage(leftStorageSpeed, rightStorageSpeed);
     }
 
     /**
      * Runs storage motor
      */
     public void runStorageReverse() {
-        double storageSpeed = -nt.storageSpeed.getDouble(DefaultSpeed.STORAGE) * 0.5;
-        runStorage(storageSpeed);
+        double outakeSpeed = nt.outakeSpeed.getDouble(DefaultSpeed.OUTAKE);
+        runStorage(outakeSpeed, outakeSpeed);
     }
 
     /**
      * Run storage motors at a given speed
      * @param speed - Speed to run storage motors at
      */
-    public void runStorage(double speed){
-        leftStorageMotor.set(ControlMode.PercentOutput, speed);
-        rightStorageMotor.set(ControlMode.PercentOutput, speed);
+    public void runStorage(double leftSpeed, double rightSpeed){
+        leftStorageMotor.set(ControlMode.PercentOutput, leftSpeed);
+        rightStorageMotor.set(ControlMode.PercentOutput, rightSpeed);
         update();
     }
 
@@ -97,8 +99,8 @@ public class BallStorage {
      * Runs the intake motor in reverse
      */
     public void runIntakeReverse() {
-        double intakeSpeed = -nt.intakeSpeed.getDouble(DefaultSpeed.INTAKE);
-        runIntake(intakeSpeed);
+        double outakeSpeed = nt.outakeSpeed.getDouble(DefaultSpeed.OUTAKE);
+        runIntake(outakeSpeed);
     }
 
     /**
@@ -128,8 +130,8 @@ public class BallStorage {
      * Runs the feed motor in reverse
      */
     public void runFeedReverse() {
-        double feedSpeed = -nt.feedSpeed.getDouble(DefaultSpeed.FEED) * 0.5;
-        runFeed(feedSpeed);
+        double outakeSpeed = nt.outakeSpeed.getDouble(DefaultSpeed.OUTAKE);
+        runFeed(outakeSpeed);
     }
 
     /**
