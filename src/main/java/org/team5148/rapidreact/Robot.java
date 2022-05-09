@@ -150,15 +150,12 @@ public class Robot extends TimedRobot {
 		boolean reverseCtrlInput = driveController.getLeftBumper();
 		boolean slowCtrlInput = driveController.getRightBumper();
 		boolean alignGoalInput = driveController.getAButton();
-		double xInput = driveController.getLeftX();
 		double yInput = -driveController.getLeftY();
-		double zInput = DefaultSpeed.ROTATE * -driveController.getRightX();
+		double zInput = DefaultSpeed.ROTATE * driveController.getRightX();
 
 		// Deadband
 		boolean isShooting = shootAutoDistInput || shootLaunchpadInput || shootLowGoalInput || shootTarmacInput;
 		double speed = (slowCtrlInput || isShooting) ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;
-		if (Math.abs(xInput) < DEADBAND)
-			xInput = 0;
 		if (Math.abs(yInput) < DEADBAND)
 			yInput = 0;
 		if (Math.abs(zInput) < DEADBAND)
@@ -170,7 +167,6 @@ public class Robot extends TimedRobot {
 		
 		// Reverse
 		if (reverseCtrlInput) {
-			xInput *= -1;
 			yInput *= -1;
 		}
 
@@ -265,10 +261,10 @@ public class Robot extends TimedRobot {
 		}
 
 		// Drive Train
-		backLeft.set(-speed * (-xInput + yInput - zInput));
-		backRight.set(speed * (xInput + yInput + zInput));
-		frontLeft.set(-speed * (xInput + yInput - zInput));
-		frontRight.set(speed * (-xInput + yInput + zInput));		
+		backLeft.set(-speed * (yInput + zInput));
+		frontLeft.set(-speed * (yInput + zInput));
+		backRight.set(speed * (yInput - zInput));
+		frontRight.set(speed * (yInput - zInput));	
 	}
 
 	/*
