@@ -16,6 +16,14 @@
           "open": true
         }
       }
+    },
+    "RoboRIO": {
+      "6V Rail": {
+        "open": true
+      },
+      "window": {
+        "visible": true
+      }
     }
   },
   "NTProvider": {
@@ -32,6 +40,11 @@
       "/Shuffleboard/Simulation/Field": "Field2d"
     },
     "windows": {
+      "/FMSInfo": {
+        "window": {
+          "visible": true
+        }
+      },
       "/Shuffleboard/Simulation/Field": {
         "image": "C:\\Users\\aus43\\Downloads\\Cropped-RapidReactFieldRender-Dark.png",
         "window": {
@@ -41,6 +54,14 @@
     }
   },
   "NetworkTables": {
+    "FMSInfo": {
+      "open": true
+    },
+    "LiveWindow": {
+      "Ungrouped": {
+        "open": true
+      }
+    },
     "Shuffleboard": {
       "Autonomous": {
         "open": true

@@ -1,6 +1,7 @@
 package org.team5148.rapidreact;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 
@@ -17,6 +18,7 @@ public class Robot extends TimedRobot {
 	// Constants
 	private final double DEADBAND = 0.2;
 	private final double RUMBLE = 0.2;
+	private final double MIN_BATTERY_VOLTAGE = 11.5;
 
 	// Values
 	private boolean isFeeding = false;
@@ -99,9 +101,17 @@ public class Robot extends TimedRobot {
 		boolean reverseCtrlInput = driveController.getLeftBumper();
 		boolean slowCtrlInput = driveController.getRightBumper();
 		boolean alignGoalInput = driveController.getAButton();
+		boolean checkVoltageInput = driveController.getBButton();
 		double xInput = driveController.getLeftX();
 		double yInput = -driveController.getLeftY();
 		double zInput = DefaultSpeed.ROTATE * -driveController.getRightX();
+
+		// Battery Voltage
+		double batteryVoltage = RobotController.getBatteryVoltage();
+		if (batteryVoltage < MIN_BATTERY_VOLTAGE && checkVoltageInput)
+			driveController.setRumble(RumbleType.kRightRumble, Math.min(MIN_BATTERY_VOLTAGE - batteryVoltage, 1));
+		else
+			driveController.setRumble(RumbleType.kRightRumble, 0);
 		
 		// Reverse
 		if (reverseCtrlInput) {
