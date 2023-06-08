@@ -1,6 +1,6 @@
 package org.team5148.rapidreact;
 
-import org.team5148.rapidreact.autonomous.AutoManager;
+//import org.team5148.rapidreact.autonomous.AutoManager;
 import org.team5148.rapidreact.config.DefaultSpeed;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -16,7 +16,7 @@ public class NTManager {
     public static NTManager instance;
 
     // Autonomous
-    public ShuffleboardTab autoTab = Shuffleboard.getTab("Autonomous");
+    /*public ShuffleboardTab autoTab = Shuffleboard.getTab("Autonomous");
     public NetworkTableEntry autoAbort = autoTab.add("Is Aborted", false).getEntry();
     public NetworkTableEntry autoGyro = autoTab.add("Gyro Angle", 0).getEntry();
     public NetworkTableEntry autoGoalAngle = autoTab.add("Goal Angle", 0).getEntry();
@@ -54,7 +54,7 @@ public class NTManager {
     // Simulation
     public ShuffleboardTab simTab = Shuffleboard.getTab("Simulation");
     public Field2d simField = new Field2d();
-    public ComplexWidget simFieldEntry = simTab.add("Field", simField);
+    public ComplexWidget simFieldEntry = simTab.add("Field", simField);*/
 
     /**
      * Gets the current instance of NTManager

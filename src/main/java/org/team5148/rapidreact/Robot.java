@@ -8,14 +8,14 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import org.team5148.lib.Vector3;
-import org.team5148.rapidreact.autonomous.AutoInput;
-import org.team5148.rapidreact.autonomous.AutoManager;
+//import org.team5148.rapidreact.autonomous.AutoInput;
+//import org.team5148.rapidreact.autonomous.AutoManager;
 import org.team5148.rapidreact.config.DefaultSpeed;
 import org.team5148.rapidreact.config.LauncherTarget;
 import org.team5148.rapidreact.config.MotorIDs;
 import org.team5148.rapidreact.subsystem.BallLauncher;
 import org.team5148.rapidreact.subsystem.BallStorage;
-import org.team5148.rapidreact.subsystem.Climber;
+//import org.team5148.rapidreact.subsystem.Climber;
 
 public class Robot extends TimedRobot {
 
@@ -36,16 +36,16 @@ public class Robot extends TimedRobot {
 	private CANSparkMax frontRight = new CANSparkMax(MotorIDs.FRONT_RIGHT, MotorType.kBrushless);
 
 	// Subsystems
-	private AutoManager autoManager = new AutoManager();
+	//private AutoManager autoManager = new AutoManager();
 	private BallLauncher ballLauncher = new BallLauncher();
 	private BallStorage ballStorage = new BallStorage();
-	private Climber climber = new Climber();
+	//private Climber climber = new Climber();
 
 	public void initDrivetrain() {
-		backLeft.setOpenLoopRampRate(RAMP);
-		backRight.setOpenLoopRampRate(RAMP);
-		frontLeft.setOpenLoopRampRate(RAMP);
-		frontRight.setOpenLoopRampRate(RAMP);
+		//backLeft.setOpenLoopRampRate(RAMP);
+		//backRight.setOpenLoopRampRate(RAMP);
+		//frontLeft.setOpenLoopRampRate(RAMP);
+		//frontRight.setOpenLoopRampRate(RAMP);
 	}
 
 	@Override
@@ -69,45 +69,11 @@ public class Robot extends TimedRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		initDrivetrain();
-		autoManager.initAuto();
+		
 	}
 
 	@Override
 	public void autonomousPeriodic() {
-		AutoInput input = autoManager.update();
-		
-		// Ball Storage / Launcher
-		if (input.isShooting) {
-			ballLauncher.run(LauncherTarget.Tarmac);
-
-			boolean isRev = ballLauncher.getRev();
-			if (isRev)
-				isFeeding = true;
-			if (isFeeding) {
-				ballStorage.runFeed();
-				ballStorage.stopIntake();
-				ballStorage.runStorage();
-			} else {
-				ballStorage.stopFeed();
-				ballStorage.runIntake();
-				ballStorage.stopStorage();
-			}
-		} else {
-			ballLauncher.run(0);
-			ballStorage.runIntake();
-			ballStorage.runAutomatic();
-			isFeeding = false;
-		}
-		
-		// Movement
-		double xInput = input.move.x;
-		double yInput = input.move.y;
-		double zInput = input.move.z;
-		backLeft.set(-(-xInput + yInput - zInput));
-		backRight.set(xInput + yInput + zInput);
-		frontLeft.set(-(xInput + yInput - zInput));
-		frontRight.set(-xInput + yInput + zInput);
 	}
 
 	/*
@@ -123,18 +89,18 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopInit() {
 		initDrivetrain();
-		autoManager.initTeleop();
-		climber.reset();
+		//autoManager.initTeleop();
+		//climber.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		autoManager.update();
+		//autoManager.update();
 
 		// Manipulator Input
-		double climberLeftInput = manipController.getLeftY();
-		double climberRightInput = manipController.getRightY();
-		boolean forceClimbInput = manipController.getRightStickButton() || manipController.getLeftStickButton();
+		//double climberLeftInput = manipController.getLeftY();
+		//double climberRightInput = manipController.getRightY();
+		//boolean forceClimbInput = manipController.getRightStickButton() || manipController.getLeftStickButton();
 		boolean outakeInput = manipController.getLeftBumper();
 		boolean intakeInput =  manipController.getRightBumper();
 		boolean shootLowGoalInput = manipController.getYButton();
@@ -150,34 +116,27 @@ public class Robot extends TimedRobot {
 		boolean reverseCtrlInput = driveController.getLeftBumper();
 		boolean slowCtrlInput = driveController.getRightBumper();
 		boolean alignGoalInput = driveController.getAButton();
-		double xInput = driveController.getLeftX();
-		double yInput = -driveController.getLeftY();
-		double zInput = DefaultSpeed.ROTATE * -driveController.getRightX();
+		double yInput = driveController.getLeftY();
+		double zInput = DefaultSpeed.ROTATE * driveController.getRightX();
+		double xInput = -driveController.getLeftX();
 
 		// Deadband
 		boolean isShooting = shootAutoDistInput || shootLaunchpadInput || shootLowGoalInput || shootTarmacInput;
 		double speed = (slowCtrlInput || isShooting) ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;
-		if (Math.abs(xInput) < DEADBAND)
-			xInput = 0;
 		if (Math.abs(yInput) < DEADBAND)
 			yInput = 0;
 		if (Math.abs(zInput) < DEADBAND)
 			zInput = 0;
-		if (Math.abs(climberLeftInput) < DEADBAND)
-			climberLeftInput = 0;
-		if (Math.abs(climberRightInput) < DEADBAND)
-			climberRightInput = 0;
+		if (Math.abs(xInput) < DEADBAND)
+			xInput = 0;
+		//if (Math.abs(climberLeftInput) < DEADBAND)
+		//	climberLeftInput = 0;
+		//if (Math.abs(climberRightInput) < DEADBAND)
+		//	climberRightInput = 0;
 		
 		// Reverse
 		if (reverseCtrlInput) {
-			xInput *= -1;
 			yInput *= -1;
-		}
-
-		// Tracking
-		if (alignGoalInput) {
-			Vector3 input = autoManager.alignToGoal();
-			zInput = input.z / speed;
 		}
 
 		// Manip Rumble
@@ -196,8 +155,6 @@ public class Robot extends TimedRobot {
 			ballLauncher.run(LauncherTarget.Tarmac);
 		else if (shootLaunchpadInput)
 			ballLauncher.run(LauncherTarget.Launchpad);
-		else if (shootAutoDistInput)
-			ballLauncher.runAuto(autoManager.getGoalDistance());
 		else
 			ballLauncher.stop();
 
@@ -256,19 +213,19 @@ public class Robot extends TimedRobot {
 		}
 
 		// Climber
-		if (forceClimbInput) {
+		/*if (forceClimbInput) {
 			climber.forceRunLeft(climberLeftInput);
 			climber.forceRunRight(climberRightInput);
 		} else {
 			climber.runLeft(climberLeftInput);
 			climber.runRight(climberRightInput);
-		}
+		}*/
 
 		// Drive Train
-		backLeft.set(-speed * (-xInput + yInput - zInput));
-		backRight.set(speed * (xInput + yInput + zInput));
-		frontLeft.set(-speed * (xInput + yInput - zInput));
-		frontRight.set(speed * (-xInput + yInput + zInput));		
+		backLeft.set(0.3 * (-speed * (-xInput + yInput - zInput)));
+		backRight.set(0.3 * (speed * (xInput + yInput + zInput)));
+		frontLeft.set(0.3 * (-speed * (xInput + yInput - zInput)));
+		frontRight.set(0.3 * (speed * (-xInput + yInput + zInput)));	
 	}
 
 	/*
@@ -286,6 +243,5 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void testPeriodic() {
-		autoManager.getGoalDistance();
 	}
 }

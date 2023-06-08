@@ -57,8 +57,8 @@ public class BallStorage {
      * Runs storage motor
      */
     public void runStorage() {
-        double leftStorageSpeed = nt.leftStorageSpeed.getDouble(DefaultSpeed.LEFT_STORAGE);
-        double rightStorageSpeed = nt.rightStorageSpeed.getDouble(DefaultSpeed.RIGHT_STORAGE);
+        double leftStorageSpeed = 0;
+        double rightStorageSpeed = 0;
         runStorage(leftStorageSpeed, rightStorageSpeed);
     }
 
@@ -66,7 +66,7 @@ public class BallStorage {
      * Runs storage motor
      */
     public void runStorageReverse() {
-        double outakeSpeed = nt.outakeSpeed.getDouble(DefaultSpeed.OUTAKE);
+        double outakeSpeed = -0.3;
         runStorage(outakeSpeed, outakeSpeed);
     }
 
@@ -91,7 +91,7 @@ public class BallStorage {
      * Runs the intake motor
      */
     public void runIntake() {
-        double intakeSpeed = nt.intakeSpeed.getDouble(DefaultSpeed.INTAKE);
+        double intakeSpeed = 0.4;
         runIntake(intakeSpeed);
     }
 
@@ -99,7 +99,7 @@ public class BallStorage {
      * Runs the intake motor in reverse
      */
     public void runIntakeReverse() {
-        double outakeSpeed = nt.outakeSpeed.getDouble(DefaultSpeed.OUTAKE);
+        double outakeSpeed = -0.3;
         runIntake(outakeSpeed);
     }
 
@@ -122,7 +122,7 @@ public class BallStorage {
      * Runs the feed motor
      */
     public void runFeed() {
-        double feedSpeed = nt.feedSpeed.getDouble(DefaultSpeed.FEED);
+        double feedSpeed = -0.4;
         runFeed(feedSpeed);
     }
 
@@ -130,7 +130,7 @@ public class BallStorage {
      * Runs the feed motor in reverse
      */
     public void runFeedReverse() {
-        double outakeSpeed = nt.outakeSpeed.getDouble(DefaultSpeed.OUTAKE);
+        double outakeSpeed = -0.3;
         runFeed(outakeSpeed);
     }
 
@@ -139,14 +139,14 @@ public class BallStorage {
      * @param speed - Speed to run launcher feed motors at
      */
     public void runFeed(double speed) {
-        feedMotor.set(ControlMode.PercentOutput, -speed);
+        feedMotor.set(ControlMode.PercentOutput, speed);
     }
 
     private void update() {
         beginValue = !lineBreakBegin.get();
         endValue = !lineBreakEnd.get();
 
-        nt.lineBreak1.setBoolean(beginValue);
-        nt.lineBreak2.setBoolean(endValue);
+        //nt.lineBreak1.setBoolean(beginValue);
+        //nt.lineBreak2.setBoolean(endValue);
     }
 }
