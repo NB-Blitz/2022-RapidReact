@@ -26,7 +26,7 @@ public class Robot extends TimedRobot {
 	private boolean isFeeding = false;
 
 	// Controllers
-	private XboxController driveController = new XboxController(0);
+	//private XboxController driveController = new XboxController(0);
 	private XboxController manipController = new XboxController(1);
 
 	// Motors
@@ -113,16 +113,16 @@ public class Robot extends TimedRobot {
 		boolean forceOutakeInput = povInput == 180;
 
 		// Driver Input
-		boolean reverseCtrlInput = driveController.getLeftBumper();
-		boolean slowCtrlInput = driveController.getRightBumper();
-		boolean alignGoalInput = driveController.getAButton();
-		double yInput = driveController.getLeftY();
-		double zInput = DefaultSpeed.ROTATE * driveController.getRightX();
-		double xInput = -driveController.getLeftX();
+		//boolean reverseCtrlInput = driveController.getLeftBumper();
+		//boolean slowCtrlInput = driveController.getRightBumper();
+		//boolean alignGoalInput = driveController.getAButton();
+		double yInput = manipController.getLeftY();
+		double zInput = DefaultSpeed.ROTATE * manipController.getRightX();
+		double xInput = -manipController.getLeftX();
 
 		// Deadband
 		boolean isShooting = shootAutoDistInput || shootLaunchpadInput || shootLowGoalInput || shootTarmacInput;
-		double speed = (slowCtrlInput || isShooting) ? DefaultSpeed.SLOW_DRIVE : DefaultSpeed.DRIVE;
+		double speed = /*(slowCtrlInput || isShooting) ? DefaultSpeed.SLOW_DRIVE :*/ DefaultSpeed.DRIVE;
 		if (Math.abs(yInput) < DEADBAND)
 			yInput = 0;
 		if (Math.abs(zInput) < DEADBAND)
@@ -135,9 +135,9 @@ public class Robot extends TimedRobot {
 		//	climberRightInput = 0;
 		
 		// Reverse
-		if (reverseCtrlInput) {
+		/*if (reverseCtrlInput) {
 			yInput *= -1;
-		}
+		}*/
 
 		// Manip Rumble
 		if (forceIntakeInput || forceOutakeInput) {
@@ -161,14 +161,14 @@ public class Robot extends TimedRobot {
 		// Ball Storage
 		if (forceIntakeInput) {
 			ballStorage.runIntake(1);
-			ballStorage.runStorage(1, 1);
-			ballStorage.runFeed(1);
-		}
-		else if (forceOutakeInput) {
-			ballStorage.runIntake(-1);
-			ballStorage.runStorage(-1, -1);
+			ballStorage.runStorage(0.7, 0.7);
 			ballStorage.runFeed(-1);
 		}
+		/*else if (forceOutakeInput) {
+			ballStorage.runIntake(-1);
+			ballStorage.runStorage(-0.7, -0.7);
+			ballStorage.runFeed(1);
+		}*/
 		else if (isShooting) {
 			boolean isRev = ballLauncher.getRev();
 			if (isRev)

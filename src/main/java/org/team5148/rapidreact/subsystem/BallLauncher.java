@@ -63,7 +63,7 @@ public class BallLauncher {
      */
     public void run(double velocity){
         double roll = -0.08;
-        run(velocity + roll, velocity - roll);
+        run(velocity * 0.5 + roll, velocity - roll);
     }
     
     /**
