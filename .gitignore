@@ -104,7 +104,7 @@ Temporary Items
 .apdisk
 
 ### VisualStudioCode ###
-.vscode/*
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -157,6 +157,16 @@ gradle-app.setting
 .project
 .settings/
 bin/
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
+
+# Fleet
+.fleet
 
 # Simulation GUI and other tools window save file
 *-window.json
