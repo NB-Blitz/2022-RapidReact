@@ -222,10 +222,10 @@ public class Robot extends TimedRobot {
 		}*/
 
 		// Drive Train
-		backLeft.set(0.3 * (-speed * (-xInput + yInput - zInput)));
-		backRight.set(0.3 * (speed * (xInput + yInput + zInput)));
-		frontLeft.set(0.3 * (-speed * (xInput + yInput - zInput)));
-		frontRight.set(0.3 * (speed * (-xInput + yInput + zInput)));	
+		backLeft.set(1.0 * (-speed * (-xInput + yInput - zInput)));
+		backRight.set(1.0 * (speed * (xInput + yInput + zInput)));
+		frontLeft.set(1.0 * (-speed * (xInput + yInput - zInput)));
+		frontRight.set(1.0 * (speed * (-xInput + yInput + zInput)));
 	}
 
 	/*
